@@ -1,4 +1,4 @@
-## Bit by Bit Anki based interview prep
+## Anki based interview prep
 
 Welcome to Bit by Bit's **Anki** repository!
 
