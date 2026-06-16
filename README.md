@@ -1,86 +1,52 @@
-# 🧠 100 Interview Questions – HTML, CSS, JavaScript, React, Node.js, and MERN
+## Bit by Bit Anki based interview prep
 
-Welcome to the **100 Interview Questions** repository!  
-This collection is crafted to help developers prepare for **frontend**, **backend**, and **full-stack MERN** interviews. It contains **carefully curated and frequently asked** technical questions across:
+Welcome to Bit by Bit's **Anki** repository!
 
-- HTML
-- CSS
-- JavaScript (Core + ES6+)
-- React.js
-- Node.js
-- MERN Stack (MongoDB, Express, React, Node)
+This collection is created to help students and developers at Bit by Bit prepare for **frontend** and **backend** interviews.
+
+## How to use
+
+1. Git clone the repo or download the md files/topics you would like to prepare.
+2. Install [Anki-Panky](https://github.com/kamalsacranie/anki-panky).
+3. To create an .apkg file run the following command:
+
+   ```bash
+        anki-panky /path/to/your/markdown/notes.md -o /path/to/output/directory
+   ```
+
+4. Import the .apkg file in Anki to create your deck.
 
 ---
 
 ## 📂 Table of Contents
 
-1. [HTML Questions](#1-html)
-2. [CSS Questions](#2-css)
-3. [JavaScript Questions](#3-javascript)
-4. [React.js Questions](#4-reactjs)
-5. [Node.js Questions](#5-nodejs)
-6. [MERN Stack Questions](#6-mern-stack)
-7. [How to Use](#how-to-use)
-8. [Contribute](#contribute)
-9. [License](#license)
+1. frontend
+2. languages
+3. node
+4. cloud computing
+5. leetcode
 
 ---
 
-## ✅ 1. HTML
+## 1. frontend
 
-- Semantic HTML
-- Accessibility (ARIA)
-- SEO best practices
-- Forms and validation
-- Media elements
+- html
+- css
+- react
+- next
+- mern
 
-## 🎨 2. CSS
+## 2. languages
 
-- Box model
-- Positioning and Flex/Grid layout
-- Specificity and inheritance
-- Responsive design (Media queries)
-- Animations and transitions
+- javascript
+- golang
 
-## 🧮 3. JavaScript
+## 3. node
 
-- Closures, Scope, Hoisting
-- Promises, Async/Await
-- Event loop and call stack
-- ES6+ features (Destructuring, Spread/Rest, etc.)
-- DOM manipulation
+## 4. cloud computing
 
-## ⚛️ 4. ReactJS
-
-- Lifecycle methods / Hooks
-- Component state and props
-- Conditional rendering
-- Context API and Redux (basics)
-- Optimization techniques
-
-## 🔌 5. NodeJS
-
-- Event-driven architecture
-- File system module
-- Middleware & Express basics
-- REST APIs
-- Error handling and debugging
-
-## 🌐 6. MERN Stack
-
-- Integrating MongoDB with Node/Express
-- RESTful API with Express.js
-- React frontend with backend APIs
-- Authentication (JWT/session-based)
-- Deployment strategy
+## 5. leetcode
 
 ---
 
-## 📚 How to Use
-
-Clone the repo and start exploring each topic based on your interview needs:
-
-```bash
-git clone https://github.com/your-username/100-interview-questions.git
-cd 100-interview-questions
-```
+**Acknowledgment**: This repository takes some of its content from [repo](https://github.com/VedantBhawsar/100-interview-questions/tree/master)
