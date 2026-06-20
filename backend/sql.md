@@ -2665,3 +2665,227 @@ WHERE a.email = b.email
 <https://www.postgresql.org/docs/current/ddl-system-columns.html>
 
 <AnkiTags DML duplicates ROW-NUMBER interview-classic advanced/>
+
+# When should you use a subquery vs a CTE vs a temporary table?
+
+All three let you build a query on top of an intermediate result, but they differ in readability, reusability, and lifetime.
+
+**Inline subquery (derived table):** a query nested directly inside another.
+
+```sql
+SELECT * FROM (
+    SELECT customer_id, SUM(total) AS spend FROM orders GROUP BY customer_id
+) t WHERE spend > 1000;
+```
+
+Best for: a one-off intermediate result used once. Can become hard to read when nested deeply.
+
+**CTE (`WITH`):** a named temporary result set scoped to a single statement.
+
+```sql
+WITH customer_spend AS (
+    SELECT customer_id, SUM(total) AS spend FROM orders GROUP BY customer_id
+)
+SELECT * FROM customer_spend WHERE spend > 1000;
+```
+
+Best for: readability, breaking complex logic into named steps, referencing the same intermediate result multiple times in one query, and recursion (recursive CTEs).
+
+**Temporary table:** a real table that persists for the session (or transaction).
+
+```sql
+CREATE TEMP TABLE customer_spend AS
+    SELECT customer_id, SUM(total) AS spend FROM orders GROUP BY customer_id;
+-- can be indexed, queried repeatedly across MULTIPLE statements, then dropped
+```
+
+Best for: an expensive intermediate result reused across **many** separate queries, or when you want to add an index to the intermediate data.
+
+**Performance nuance interviewers probe:** a CTE is _not_ automatically a performance win. In PostgreSQL 12+, a single-use CTE is **inlined** and optimized just like a subquery — the historical "optimization fence" behavior changed. The choice between subquery and CTE is therefore mostly about **readability**, not speed; reach for a temp table only when the intermediate result is genuinely reused across statements or benefits from its own index.
+
+**Source:** <https://www.postgresql.org/docs/current/queries-with.html>
+
+<AnkiTags CTE subquery temp-table query-structure intermediate advanced/>
+
+# What is a cursor in SQL, and why is it usually discouraged?
+
+A cursor is a database object that lets you process a query's result set **one row at a time**, in a procedural loop, rather than operating on the whole set at once.
+
+```sql
+-- Conceptual example (PostgreSQL PL/pgSQL)
+DECLARE order_cursor CURSOR FOR SELECT id, total FROM orders;
+-- then FETCH rows one by one in a loop and process each individually
+```
+
+**Why cursors are usually discouraged:** SQL is designed to be **set-based** — you describe _what_ you want and let the engine process all matching rows in one optimized operation. A cursor forces **row-by-row (RBAR — "row by agonizing row")** processing, which:
+
+- Defeats the query optimizer's ability to batch and parallelize work.
+- Adds per-row overhead (context switching between the loop and the engine).
+- Is typically **orders of magnitude slower** than the equivalent set-based statement.
+
+```sql
+-- Cursor mindset (slow): loop over each row, UPDATE one at a time
+-- Set-based equivalent (fast): one statement does it all
+UPDATE orders SET status = 'archived' WHERE created_at < '2023-01-01';
+```
+
+**When a cursor is legitimately justified:** genuinely sequential logic that can't be expressed as a set operation — e.g. row-by-row processing where each step depends on the result of the previous one, calling an external procedure per row, or administrative scripts iterating over objects. The interview-strong answer is: "prefer a set-based query; use a cursor only when the logic is inherently sequential and can't be expressed declaratively."
+
+**Source:** <https://www.postgresql.org/docs/current/plpgsql-cursors.html>
+
+<AnkiTags cursors set-based-operations performance intermediate advanced/>
+
+# How do you track historical changes to records in SQL (slowly changing dimensions / audit history)?
+
+When you need to know not just the current value of a record but its **history over time**, the common patterns are:
+
+**1. Valid-from / valid-to versioning (temporal / SCD Type 2):** keep multiple rows per entity, each marking the period it was valid.
+
+```sql
+CREATE TABLE price_history (
+    product_id   INT,
+    price        NUMERIC,
+    valid_from   TIMESTAMPTZ,
+    valid_to     TIMESTAMPTZ,   -- NULL = currently active row
+    PRIMARY KEY (product_id, valid_from)
+);
+
+-- The current price is the row with valid_to IS NULL.
+-- The price as of any past date:
+SELECT price FROM price_history
+WHERE product_id = 42
+  AND '2024-06-01' >= valid_from
+  AND ('2024-06-01' < valid_to OR valid_to IS NULL);
+```
+
+**2. Append-only / event log:** never update or delete; only insert new rows representing changes. The current state is derived by taking the latest row per entity (often via `ROW_NUMBER()` or `DISTINCT ON`).
+
+**3. Audit table via triggers:** keep the main table holding only current state, and a separate `*_audit` table that a trigger writes to on every `INSERT`/`UPDATE`/`DELETE`, recording the old/new values, timestamp, and user.
+
+```sql
+-- Trigger fires on UPDATE/DELETE and writes the prior row into orders_audit
+CREATE TRIGGER orders_audit_trg
+AFTER UPDATE OR DELETE ON orders
+FOR EACH ROW EXECUTE FUNCTION log_order_change();
+```
+
+**Choosing:** SCD Type 2 (valid-from/to) is the standard for analytical/dimensional warehouses; trigger-based audit tables are common for compliance/change-tracking on OLTP tables; append-only event logs suit event-sourced architectures.
+
+**Source:** <https://www.postgresql.org/docs/current/triggers.html>
+
+<AnkiTags historical-tracking slowly-changing-dimensions audit temporal schema-design intermediate advanced/>
+
+# What is SQL injection and how do you prevent it?
+
+SQL injection is a security vulnerability where an attacker inserts malicious SQL through user input that gets concatenated directly into a query string, allowing them to read, modify, or destroy data they shouldn't have access to.
+
+```sql
+-- VULNERABLE: user input concatenated straight into the query string
+query = "SELECT * FROM users WHERE email = '" + user_input + "'";
+
+-- If user_input is:   ' OR '1'='1
+-- the query becomes:
+SELECT * FROM users WHERE email = '' OR '1'='1';   -- returns ALL users
+
+-- If user_input is:   '; DROP TABLE users; --
+-- the query becomes a second, destructive statement.
+```
+
+**The primary defense — parameterized queries (prepared statements):** never build SQL by string concatenation. Pass user input as **bound parameters**, so the database treats it strictly as a _value_, never as executable SQL.
+
+```sql
+-- SAFE: the driver sends the query and the value separately;
+-- the input can never change the query's structure
+SELECT * FROM users WHERE email = $1;   -- $1 bound to user_input
+```
+
+```python
+# Example in Python (psycopg) — placeholder, not f-string concatenation:
+cur.execute("SELECT * FROM users WHERE email = %s", (user_input,))
+```
+
+**Defense in depth (secondary layers):**
+
+- **Least-privilege DB accounts:** the app's database user should only have the permissions it needs — not `DROP`/`GRANT`.
+- **Input validation / allow-lists:** especially for things that can't be parameterized, like dynamic table/column names or `ORDER BY` directions.
+- **ORMs and query builders** parameterize by default — but raw/`.raw()` escape hatches re-introduce the risk if misused.
+
+The single most important point in an interview: **parameterized queries are the fix**; escaping input manually is error-prone and not a substitute.
+
+**Source:** <https://owasp.org/www-community/attacks/SQL_Injection>
+
+<AnkiTags sql-injection security parameterized-queries prepared-statements intermediate advanced/>
+
+# What is the difference between a star schema and a snowflake schema?
+
+Both are dimensional modeling designs for data warehouses, organizing data into a central **fact table** (measurable events, e.g. sales) surrounded by **dimension tables** (descriptive context, e.g. product, date, customer).
+
+**Star schema:** dimension tables are **denormalized** — each dimension is a single flat table directly joined to the fact table.
+
+```
+              dim_date
+                 |
+dim_product — fact_sales — dim_customer
+                 |
+              dim_store
+
+Each dimension is ONE table. Querying needs a single join per dimension.
+```
+
+**Snowflake schema:** dimension tables are **normalized** — a dimension is split into multiple related tables, forming branches off the central fact table.
+
+```
+dim_product → dim_category → dim_department
+      |
+ fact_sales
+
+The product dimension is normalized into a chain of tables,
+requiring multiple joins to fully resolve.
+```
+
+|                      | Star                           | Snowflake           |
+| -------------------- | ------------------------------ | ------------------- |
+| Dimension tables     | Denormalized (flat)            | Normalized (split)  |
+| Joins per query      | Fewer                          | More                |
+| Query performance    | Generally faster (fewer joins) | Slower (more joins) |
+| Storage / redundancy | More redundancy                | Less redundancy     |
+| Readability          | Simpler                        | More complex        |
+
+**The trade-off:** star schemas favor query speed and simplicity (the common choice for analytics/BI), while snowflake schemas favor storage efficiency and avoiding update anomalies in large dimensions — at the cost of more joins.
+
+**Source:** <https://www.postgresql.org/docs/current/tutorial-join.html>
+
+<AnkiTags star-schema snowflake-schema data-warehouse dimensional-modeling intermediate advanced/>
+
+# What is a semi-join and an anti-join in SQL?
+
+These are relational concepts describing two common filtering patterns. SQL has no dedicated `SEMI JOIN`/`ANTI JOIN` keywords — they're expressed with `EXISTS`/`IN` and `NOT EXISTS`/`NOT IN`, and the optimizer recognizes them.
+
+**Semi-join:** returns rows from the left table that have **at least one match** in the right table — but does **not** add columns from the right table or duplicate left rows for multiple matches.
+
+```sql
+-- "Customers who have placed at least one order"
+SELECT * FROM customers c
+WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);
+
+-- Contrast with an INNER JOIN, which WOULD duplicate a customer row
+-- once per matching order. A semi-join returns each customer at most once.
+```
+
+**Anti-join:** the opposite — returns rows from the left table that have **no match** in the right table.
+
+```sql
+-- "Customers who have never placed an order"
+SELECT * FROM customers c
+WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);
+```
+
+**Why the concept matters:**
+
+- A semi-join is the _correct_ tool when you want existence-filtering without the row multiplication an `INNER JOIN` causes.
+- `NOT EXISTS` is the **NULL-safe** way to write an anti-join — `NOT IN` with a subquery that can contain NULLs silently returns zero rows (a classic bug).
+- Recognizing these patterns helps you read `EXPLAIN` output, where engines label plan nodes as "Semi Join" / "Anti Join".
+
+**Source:** <https://www.postgresql.org/docs/current/functions-subquery.html>
+
+<AnkiTags semi-join anti-join EXISTS NOT-EXISTS joins advanced/>
