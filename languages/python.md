@@ -3003,3 +3003,236 @@ with Transaction() as tx:
 **Source:** <https://docs.python.org/3/reference/datamodel.html#context-managers>
 
 <AnkiTags contextmanager OOP intermediate/>
+
+# Is Python a compiled or interpreted language?
+
+Python is **both** — it compiles source code to bytecode, then interprets that bytecode. Calling it purely "interpreted" is a common oversimplification.
+
+```
+1. Source code (.py) is compiled to bytecode (.pyc) by the compiler.
+   Bytecode is a lower-level, platform-independent representation.
+2. The Python Virtual Machine (PVM) then executes (interprets) the
+   bytecode instruction by instruction.
+
+# .pyc files are cached in __pycache__/ to skip recompilation
+# when the source hasn't changed.
+```
+
+**Key clarifications:**
+
+- **CPython** (the reference implementation) compiles to bytecode and interprets it.
+- The compilation step is implicit — you don't run a separate compiler; it happens automatically on import/run.
+- **PyPy** uses a **JIT (Just-In-Time) compiler** that compiles hot bytecode paths to native machine code at runtime for speed.
+- Bytecode is **not** machine code — it still needs the PVM to run, which is why Python is portable across platforms but slower than fully-compiled languages like C.
+
+**Source:** <https://docs.python.org/3/glossary.html#term-bytecode>
+
+<AnkiTags execution-model bytecode CPython PVM junior intermediate/>
+
+# Is Python pass-by-value or pass-by-reference?
+
+Neither, strictly. Python uses **"pass by object reference"** (also called "pass by assignment") — the function receives a reference to the same object the caller passed, but the parameter name itself is a new binding.
+
+The observable behaviour depends on whether the object is **mutable**:
+
+```python
+def modify(lst, num):
+    lst.append(4)      # mutates the SHARED list object → visible to caller
+    num = num + 1      # rebinds local 'num' to a NEW int → NOT visible to caller
+
+my_list = [1, 2, 3]
+my_num = 10
+modify(my_list, my_num)
+
+print(my_list)   # [1, 2, 3, 4]  — the list was mutated in place
+print(my_num)    # 10            — the int is immutable; rebinding was local
+```
+
+**The mental model:**
+
+- Passing an argument binds the parameter name to the _same_ object (no copy is made).
+- **Mutating** that object (`.append()`, `obj.attr = ...`, `d[k] = ...`) is visible to the caller.
+- **Rebinding** the parameter (`x = something_new`) only changes the local name, never the caller's variable.
+
+This is why mutable objects appear "pass by reference" and immutable objects appear "pass by value" — but the underlying mechanism is identical for both.
+
+**Source:** <https://docs.python.org/3/reference/datamodel.html#objects-values-and-types>
+
+<AnkiTags functions arguments pass-by-object-reference mutability intermediate/>
+
+# What is the difference between `pass`, `continue`, and `break`?
+
+These three statements control flow differently and are frequently confused:
+
+| Statement  | Effect                                                                                       |
+| ---------- | -------------------------------------------------------------------------------------------- |
+| `pass`     | Does nothing — a syntactic placeholder where a statement is required but no action is wanted |
+| `continue` | Skips the rest of the current loop iteration and moves to the next one                       |
+| `break`    | Exits the enclosing loop entirely, immediately                                               |
+
+```python
+for n in range(5):
+    if n == 1:
+        pass        # does nothing; loop continues normally to the print
+    if n == 2:
+        continue    # skip the print for n == 2, go to next iteration
+    if n == 4:
+        break       # stop the loop entirely
+    print(n)
+# Output: 0, 1, 3
+# (1 prints because pass does nothing; 2 is skipped; 4 never reached)
+
+# pass is also used as a placeholder in empty definitions:
+def todo_later():
+    pass            # valid empty function body
+
+class Placeholder:
+    pass            # valid empty class body
+```
+
+**Source:** <https://docs.python.org/3/tutorial/controlflow.html#pass-statements>
+
+<AnkiTags control-flow pass continue break junior/>
+
+# How does Python manage memory?
+
+Python manages memory automatically through a combination of a private heap, an internal allocator, and garbage collection — the developer never manually allocates or frees memory.
+
+**The layers:**
+
+1. **Private heap:** all Python objects live in a private heap managed by the interpreter, not directly accessible to the programmer.
+2. **Memory allocator (`pymalloc`):** CPython uses a specialized allocator that manages memory in arenas → pools → blocks, optimized for many small, short-lived objects (typical of Python).
+3. **Reference counting:** each object tracks how many references point to it; when the count hits zero, the object's memory is immediately reclaimed.
+4. **Cyclic garbage collector (`gc` module):** reference counting alone can't free **reference cycles** (e.g. `a.ref = b; b.ref = a`), so a supplementary generational garbage collector periodically detects and frees unreachable cycles.
+
+```python
+import gc
+
+# Reference counting handles most cleanup immediately.
+# The cyclic GC handles cycles refcounting can't:
+a = {}
+b = {}
+a['b'] = b
+b['a'] = a       # cycle: neither can reach refcount 0 on its own
+del a, b         # refcounts don't hit zero due to the cycle...
+gc.collect()     # ...the cyclic collector reclaims them
+
+gc.disable()     # GC can be tuned/disabled for perf-critical sections
+```
+
+**Generational hypothesis:** the GC groups objects into three generations; most objects die young, so younger generations are scanned far more frequently than older ones.
+
+**Source:** <https://docs.python.org/3/c-api/memory.html>
+<https://docs.python.org/3/library/gc.html>
+
+<AnkiTags memory garbage-collection reference-counting gc intermediate advanced/>
+
+# How do you write a decorator that takes arguments?
+
+A decorator that accepts arguments needs **three nested layers** of functions: the outer function takes the decorator's arguments, the middle is the actual decorator (takes the function), and the inner is the wrapper (takes the function's arguments).
+
+```python
+import functools
+
+def retry(max_attempts, delay=0):
+    """A decorator factory — takes arguments, returns a decorator."""
+    def decorator(func):                     # the actual decorator
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):        # wraps the call
+            import time
+            last_exc = None
+            for attempt in range(max_attempts):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    last_exc = e
+                    if delay:
+                        time.sleep(delay)
+            raise last_exc                   # all attempts failed
+        return wrapper
+    return decorator
+
+@retry(max_attempts=3, delay=1)
+def fetch_data(url):
+    ...
+
+# @retry(max_attempts=3, delay=1) is evaluated as:
+# fetch_data = retry(max_attempts=3, delay=1)(fetch_data)
+```
+
+**The mental model:** `@retry(3)` first _calls_ `retry(3)` to produce a decorator, then that decorator is applied to the function — one extra layer compared to a no-argument decorator. Always use `functools.wraps` on the innermost wrapper to preserve the original function's metadata.
+
+**Source:** <https://docs.python.org/3/glossary.html#term-decorator>
+<https://docs.python.org/3/library/functools.html#functools.wraps>
+
+<AnkiTags decorators decorator-factory functools advanced/>
+
+# How do you process a file too large to fit in memory?
+
+Read and process the file **lazily** — one line or one fixed-size chunk at a time — so memory usage stays constant regardless of file size, instead of loading the whole file at once.
+
+```python
+# WRONG for a huge file — loads the entire file into memory:
+with open("huge.log") as f:
+    data = f.read()              # 8 GB file → 8 GB in RAM → likely crash
+    for line in data.splitlines():
+        process(line)
+
+# RIGHT — iterating a file object yields one line at a time, lazily:
+with open("huge.log") as f:
+    for line in f:               # only one line held in memory at a time
+        process(line)
+
+# For binary files or non-line-delimited data, read fixed-size chunks:
+with open("huge.bin", "rb") as f:
+    while chunk := f.read(8192):  # 8 KB at a time (walrus operator)
+        process(chunk)
+
+# A generator can encapsulate chunked reading for reuse:
+def read_in_chunks(file_obj, size=8192):
+    while chunk := file_obj.read(size):
+        yield chunk
+```
+
+**Why this works:** the file object is itself an **iterator** — `for line in f` calls `__next__()` under the hood, fetching only the next line from the OS buffer rather than materializing the whole file. This is the same lazy-evaluation principle behind generators.
+
+**Source:** <https://docs.python.org/3/tutorial/inputoutput.html#methods-of-file-objects>
+
+<AnkiTags file-io generators lazy-evaluation memory intermediate/>
+
+# Why are tuples immutable, and what are the benefits of immutability?
+
+Tuples are immutable by design — once created, their contents cannot be changed. This isn't a limitation so much as a set of deliberate guarantees that unlock specific capabilities.
+
+**Benefits of immutability:**
+
+1. **Hashability:** immutable objects can have a stable hash, so tuples (of hashable elements) can be used as **dictionary keys** and **set members** — lists cannot.
+
+```python
+location = {(40.7, -74.0): "New York"}   # tuple key — works
+# {[40.7, -74.0]: "New York"}            # list key — TypeError: unhashable
+```
+
+1. **Safety / intent:** immutability signals "this data is fixed," preventing accidental modification and making code easier to reason about, especially when passed between functions or shared across threads.
+
+2. **Performance:** Python can optimize immutable objects — e.g. small tuples may be cached/reused, and immutability avoids defensive copying.
+
+```python
+t = (1, 2, 3)
+t[0] = 99          # TypeError: 'tuple' object does not support item assignment
+
+# "Modifying" creates a new object, leaving the original untouched:
+t2 = t + (4,)      # (1, 2, 3, 4) — a brand new tuple
+
+# Caveat: immutability is shallow — a tuple CONTAINING a mutable object
+# can still have that inner object mutated:
+nested = ([1, 2], 3)
+nested[0].append(99)   # allowed! → ([1, 2, 99], 3)
+                       # the tuple's binding to the list is fixed,
+                       # but the list itself is still mutable
+```
+
+**Source:** <https://docs.python.org/3/reference/datamodel.html#objects-values-and-types>
+<https://docs.python.org/3/library/stdtypes.html#tuples>
+
+<AnkiTags tuples immutability hashability data-model junior intermediate/>
