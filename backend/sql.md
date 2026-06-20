@@ -6,13 +6,13 @@ name: SQL
 
 SQL is divided into four sublanguages by purpose:
 
-| Sublanguage | Stands for                   | Commands                                          |
-| ----------- | ---------------------------- | ------------------------------------------------- |
-| **DDL**     | Data Definition Language     | `CREATE`, `ALTER`, `DROP`, `RENAME`               |
-| **DML**     | Data Manipulation Language   | `INSERT`, `UPDATE`, `DELETE`, `MERGE`, `TRUNCATE` |
-| **DQL**     | Data Query Language          | `SELECT`                                          |
-| **DCL**     | Data Control Language        | `GRANT`, `REVOKE`                                 |
-| **TCL**     | Transaction Control Language | `BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`        |
+| Sublanguage | Stands for                   | Commands                                        |
+| ----------- | ---------------------------- | ----------------------------------------------- |
+| **DDL**     | Data Definition Language     | `CREATE`, `ALTER`, `DROP`, `RENAME`, `TRUNCATE` |
+| **DML**     | Data Manipulation Language   | `INSERT`, `UPDATE`, `DELETE`, `MERGE`           |
+| **DQL**     | Data Query Language          | `SELECT`                                        |
+| **DCL**     | Data Control Language        | `GRANT`, `REVOKE`                               |
+| **TCL**     | Transaction Control Language | `BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`      |
 
 Most interview questions focus on DML and DDL. Understanding the distinction helps you reason about what each statement does to the schema vs. the data.
 
