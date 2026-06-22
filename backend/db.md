@@ -6,12 +6,12 @@ name: Database Theory — Backend Engineering
 
 ACID is an acronym for the four properties a reliable transaction system guarantees:
 
-| Letter | Property | Guarantee |
-|---|---|---|
-| **A** | Atomicity | A transaction either fully completes or fully fails — no partial writes. |
-| **C** | Consistency | A transaction can only move the database from one valid state to another, respecting all constraints, triggers, and invariants. |
-| **I** | Isolation | Concurrent transactions don't see each other's intermediate, uncommitted state. |
-| **D** | Durability | Once a transaction commits, its effects survive crashes, power loss, or restarts. |
+| Letter | Property    | Guarantee                                                                                                                       |
+| ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **A**  | Atomicity   | A transaction either fully completes or fully fails — no partial writes.                                                        |
+| **C**  | Consistency | A transaction can only move the database from one valid state to another, respecting all constraints, triggers, and invariants. |
+| **I**  | Isolation   | Concurrent transactions don't see each other's intermediate, uncommitted state.                                                 |
+| **D**  | Durability  | Once a transaction commits, its effects survive crashes, power loss, or restarts.                                               |
 
 ```
 Example: transferring $100 from account A to account B
@@ -30,8 +30,8 @@ Durability:  once COMMIT returns, the transfer survives a server crash
 
 The term was coined by Härder and Reuter in their 1983 paper formalizing transaction-oriented recovery principles.
 
-**Source:** https://www.postgresql.org/docs/current/tutorial-transactions.html
-https://dl.acm.org/doi/10.1145/289.291
+**Source:** <https://www.postgresql.org/docs/current/tutorial-transactions.html>
+<https://dl.acm.org/doi/10.1145/289.291>
 
 <AnkiTags ACID transactions fundamentals junior/>
 
@@ -52,7 +52,7 @@ COMMIT;  -- only reached if both statements succeeded
 
 Atomicity is about the **transaction boundary**, not about individual statements being "safe" — a single `UPDATE` affecting a million rows is also atomic: it's all rows or none.
 
-**Source:** https://www.postgresql.org/docs/current/wal-intro.html
+**Source:** <https://www.postgresql.org/docs/current/wal-intro.html>
 
 <AnkiTags ACID atomicity WAL fundamentals junior/>
 
@@ -74,7 +74,7 @@ UPDATE accounts SET balance = balance - 1000 WHERE id = 'A';
 
 **This is a different "C" from the CAP theorem.** ACID consistency is about respecting **application-defined invariants** within a single node. CAP consistency is about **all nodes agreeing on the same value** for a piece of data in a distributed system. They share a name but answer completely different questions — interviewers often probe this exact distinction.
 
-**Source:** https://www.postgresql.org/docs/current/ddl-constraints.html
+**Source:** <https://www.postgresql.org/docs/current/ddl-constraints.html>
 
 <AnkiTags ACID consistency CAP common-confusion intermediate/>
 
@@ -83,6 +83,7 @@ UPDATE accounts SET balance = balance - 1000 WHERE id = 'A';
 Durability guarantees that once a transaction commits, its changes survive any subsequent crash, power failure, or restart — the data is permanently recorded.
 
 **How it's typically implemented:**
+
 1. Before commit, the transaction's changes are written to the **write-ahead log (WAL)** and **fsynced to disk** — forcing the OS to flush its buffers to physical storage, not just to a cache.
 2. Only after the WAL write is confirmed durable does the database acknowledge the commit to the client.
 3. The actual data file pages may still be updated lazily/asynchronously — if the system crashes, the WAL is replayed on restart to reconstruct any committed-but-not-yet-flushed changes.
@@ -98,7 +99,7 @@ With proper fsync:           commit "succeeds" → power loss → WAL replay on
 
 **Trade-off:** `fsync` is slow (millisecond-scale disk I/O). Systems that disable or delay it (e.g. `synchronous_commit = off` in PostgreSQL) trade durability for write throughput — a deliberate choice for some workloads, not a bug.
 
-**Source:** https://www.postgresql.org/docs/current/wal-reliability.html
+**Source:** <https://www.postgresql.org/docs/current/wal-reliability.html>
 
 <AnkiTags ACID durability WAL fundamentals junior intermediate/>
 
@@ -121,7 +122,7 @@ ROLLBACK; -- all changes are discarded, as if nothing happened
 
 **With transactions:** the database guarantees the pair of updates either both happen or neither does, regardless of crashes, concurrent access, or errors mid-way.
 
-**Source:** https://www.postgresql.org/docs/current/tutorial-transactions.html
+**Source:** <https://www.postgresql.org/docs/current/tutorial-transactions.html>
 
 <AnkiTags transactions fundamentals junior/>
 
@@ -129,12 +130,12 @@ ROLLBACK; -- all changes are discarded, as if nothing happened
 
 Isolation levels control **how much one transaction can "see" of another transaction's uncommitted or concurrent work.** Stricter isolation gives stronger correctness guarantees at the cost of concurrency/throughput.
 
-| Level | Prevents |
-|---|---|
-| **Read Uncommitted** | Nothing — dirty reads are possible |
-| **Read Committed** | Dirty reads |
-| **Repeatable Read** | Dirty reads, non-repeatable reads |
-| **Serializable** | Dirty reads, non-repeatable reads, phantom reads — behaves as if transactions ran one at a time |
+| Level                | Prevents                                                                                        |
+| -------------------- | ----------------------------------------------------------------------------------------------- |
+| **Read Uncommitted** | Nothing — dirty reads are possible                                                              |
+| **Read Committed**   | Dirty reads                                                                                     |
+| **Repeatable Read**  | Dirty reads, non-repeatable reads                                                               |
+| **Serializable**     | Dirty reads, non-repeatable reads, phantom reads — behaves as if transactions ran one at a time |
 
 ```
 Weaker, faster, more concurrent
@@ -144,8 +145,8 @@ Stronger, slower, less concurrent
 
 In practice, **PostgreSQL doesn't implement Read Uncommitted at all** — it treats it identically to Read Committed, because PostgreSQL's MVCC design never exposes uncommitted data. MySQL's InnoDB does implement all four.
 
-**Source:** https://www.postgresql.org/docs/current/transaction-iso.html
-https://www.iso.org/standard/63556.html
+**Source:** <https://www.postgresql.org/docs/current/transaction-iso.html>
+<https://www.iso.org/standard/63556.html>
 
 <AnkiTags isolation-levels transactions concurrency-control intermediate/>
 
@@ -171,7 +172,7 @@ ROLLBACK;  -- A's update undone
 
 Only the **Read Uncommitted** isolation level permits dirty reads. Every other standard isolation level prevents them. Dirty reads are dangerous because decisions can be made based on data that's later rolled back and effectively never happened.
 
-**Source:** https://www.postgresql.org/docs/current/transaction-iso.html
+**Source:** <https://www.postgresql.org/docs/current/transaction-iso.html>
 
 <AnkiTags isolation-levels dirty-read concurrency-control intermediate/>
 
@@ -196,7 +197,7 @@ COMMIT;
 
 **Read Committed** allows this — each individual statement sees only committed data, but different statements within the same transaction can see different committed snapshots. **Repeatable Read** and **Serializable** prevent it by guaranteeing a transaction sees a consistent snapshot for its entire duration.
 
-**Source:** https://www.postgresql.org/docs/current/transaction-iso.html
+**Source:** <https://www.postgresql.org/docs/current/transaction-iso.html>
 
 <AnkiTags isolation-levels non-repeatable-read concurrency-control intermediate/>
 
@@ -221,7 +222,7 @@ COMMIT;
 
 **Difference from non-repeatable read:** a non-repeatable read is about an existing row's value changing; a phantom read is about the **set of rows matching a condition** changing — new rows appearing or disappearing. Only **Serializable** isolation fully prevents phantom reads in the standard model (though PostgreSQL's Repeatable Read also prevents them via its snapshot implementation, which is stricter than the SQL standard requires).
 
-**Source:** https://www.postgresql.org/docs/current/transaction-iso.html
+**Source:** <https://www.postgresql.org/docs/current/transaction-iso.html>
 
 <AnkiTags isolation-levels phantom-read concurrency-control intermediate advanced/>
 
@@ -250,7 +251,7 @@ COMMIT;
 
 **Caveat:** exactly which isolation levels prevent lost updates by default is **database-specific** — PostgreSQL's Repeatable Read and MySQL/InnoDB's Repeatable Read are not identical implementations and don't give identical guarantees here. Always verify the specific behavior of the database you're using rather than assuming the SQL standard's isolation-level names mean the same thing everywhere.
 
-**Source:** https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-ROWS
+**Source:** <https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-ROWS>
 
 <AnkiTags isolation-levels lost-update concurrency-control intermediate advanced/>
 
@@ -271,7 +272,7 @@ Transaction 21 (started after tx 12 committed)  sees version 2 (balance=80)
 
 **Benefits:** readers never block writers and vice versa — dramatically improving concurrency compared to a purely lock-based approach. **Cost:** old row versions must be stored and eventually garbage-collected, and long-running transactions can prevent cleanup ("vacuum bloat" in PostgreSQL).
 
-**Source:** https://www.postgresql.org/docs/current/mvcc-intro.html
+**Source:** <https://www.postgresql.org/docs/current/mvcc-intro.html>
 
 <AnkiTags MVCC concurrency-control intermediate/>
 
@@ -291,8 +292,8 @@ Tx A (Repeatable Read): BEGIN ── SELECT (snapshot taken HERE, for whole tx) 
 
 In a pure MVCC system, a writer never has to wait for a reader to finish, because the writer is creating a brand-new row version, not modifying the one the reader is looking at. This is fundamentally different from lock-based systems, where a writer must wait for all readers holding a shared lock to release it.
 
-**Source:** https://www.postgresql.org/docs/current/mvcc-intro.html
-https://www.postgresql.org/docs/current/transaction-iso.html
+**Source:** <https://www.postgresql.org/docs/current/mvcc-intro.html>
+<https://www.postgresql.org/docs/current/transaction-iso.html>
 
 <AnkiTags MVCC isolation-levels concurrency-control intermediate advanced/>
 
@@ -323,7 +324,7 @@ WHERE id = 42 AND version = 5;
 
 **When to use which:** pessimistic locking suits high-contention workloads where retries are expensive (e.g. seat booking); optimistic concurrency suits low-contention workloads where most attempts succeed on the first try and locking overhead would be wasted (e.g. most web form edits).
 
-**Source:** https://www.postgresql.org/docs/current/explicit-locking.html
+**Source:** <https://www.postgresql.org/docs/current/explicit-locking.html>
 
 <AnkiTags concurrency-control optimistic-locking pessimistic-locking intermediate/>
 
@@ -353,7 +354,7 @@ UPDATE accounts SET ...
 
 **Prevention:** always acquire locks in a **consistent order** across all code paths (e.g. always lock lower IDs first) to avoid the circular wait condition entirely.
 
-**Source:** https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-DEADLOCKS
+**Source:** <https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-DEADLOCKS>
 
 <AnkiTags deadlock concurrency-control locking intermediate advanced/>
 
@@ -377,7 +378,7 @@ Transaction:  [acquire lock A] [acquire lock B] [acquire lock C] | [release A] [
 
 **Strict 2PL** (used by most real databases) holds **all locks until commit or rollback**, rather than releasing them as soon as the shrinking phase begins — this also prevents cascading rollbacks, since no other transaction can see a lock-protected row until the holder has definitively committed or aborted.
 
-**Source:** https://www.postgresql.org/docs/current/explicit-locking.html
+**Source:** <https://www.postgresql.org/docs/current/explicit-locking.html>
 
 <AnkiTags 2PL locking concurrency-control serializability advanced/>
 
@@ -387,11 +388,11 @@ Transaction:  [acquire lock A] [acquire lock B] [acquire lock C] | [release A] [
 
 **Exclusive lock (write lock, `X`):** Only one transaction can hold an exclusive lock on a row at a time, and no other transaction can hold any lock (shared or exclusive) on it concurrently — writers block everyone.
 
-| | Shared (S) | Exclusive (X) |
-|---|---|---|
-| Compatible with another S? | ✅ Yes | ❌ No |
-| Compatible with another X? | ❌ No | ❌ No |
-| Typical trigger | `SELECT ... FOR SHARE` | `UPDATE`, `DELETE`, `SELECT ... FOR UPDATE` |
+|                            | Shared (S)             | Exclusive (X)                               |
+| -------------------------- | ---------------------- | ------------------------------------------- |
+| Compatible with another S? | ✅ Yes                 | ❌ No                                       |
+| Compatible with another X? | ❌ No                  | ❌ No                                       |
+| Typical trigger            | `SELECT ... FOR SHARE` | `UPDATE`, `DELETE`, `SELECT ... FOR UPDATE` |
 
 ```sql
 -- Transaction A: shared lock — allows other readers, blocks writers
@@ -403,7 +404,7 @@ UPDATE accounts SET balance = balance - 50 WHERE id = 1;
 
 This S/X locking model is the foundation of pessimistic concurrency control in lock-based databases; MVCC-based systems use it more sparingly since version snapshots handle most read/write conflicts without locking.
 
-**Source:** https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-ROWS
+**Source:** <https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-ROWS>
 
 <AnkiTags locking shared-lock exclusive-lock concurrency-control intermediate/>
 
@@ -424,13 +425,15 @@ COMMIT;
 **Why it's needed:** without it, a plain `SELECT` followed by an `UPDATE` has a race condition — two transactions could both read `booked = false`, both decide to book the seat, and both succeed, resulting in a double-booking (a classic **lost update**).
 
 **`SKIP LOCKED` variant:** useful for queue-like workloads — instead of waiting for a locked row, skip it and grab the next available one:
+
 ```sql
 SELECT * FROM job_queue WHERE status = 'pending'
 ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED;
 ```
+
 This lets multiple workers pull from the same queue table without blocking each other.
 
-**Source:** https://www.postgresql.org/docs/current/sql-select.html#SQL-FOR-UPDATE-SHARE
+**Source:** <https://www.postgresql.org/docs/current/sql-select.html#SQL-FOR-UPDATE-SHARE>
 
 <AnkiTags locking select-for-update concurrency-control intermediate advanced/>
 
@@ -460,9 +463,9 @@ COMMIT;
 -- touched its own row and Repeatable Read prevented direct conflicts.
 ```
 
-**Why Repeatable Read misses it:** each transaction only writes to a row the *other* transaction never wrote to, so there's no direct write-write conflict to detect. **Only true Serializable isolation** (using techniques like Serializable Snapshot Isolation) detects this by tracking read-write dependencies across transactions, not just write-write conflicts.
+**Why Repeatable Read misses it:** each transaction only writes to a row the _other_ transaction never wrote to, so there's no direct write-write conflict to detect. **Only true Serializable isolation** (using techniques like Serializable Snapshot Isolation) detects this by tracking read-write dependencies across transactions, not just write-write conflicts.
 
-**Source:** https://www.postgresql.org/docs/current/transaction-iso.html#XACT-SERIALIZABLE
+**Source:** <https://www.postgresql.org/docs/current/transaction-iso.html#XACT-SERIALIZABLE>
 
 <AnkiTags isolation-levels write-skew serializability advanced/>
 
@@ -471,6 +474,7 @@ COMMIT;
 Traditional Serializable isolation (via strict two-phase locking) guarantees correctness but can be slow due to heavy lock contention. **Serializable Snapshot Isolation (SSI)** achieves the same guarantee with better concurrency by combining MVCC snapshots with **runtime dependency tracking**.
 
 **How it works:**
+
 1. Transactions run using ordinary MVCC snapshots (no blocking on reads).
 2. The database tracks which rows each transaction **read** and **wrote**.
 3. At commit time, it checks for specific dangerous patterns of read-write dependencies between concurrent transactions (the kind that cause write skew).
@@ -486,7 +490,7 @@ COMMIT;
 
 **Trade-off:** SSI doesn't block transactions during execution (good for throughput), but it **can abort transactions at commit time** that a lock-based approach would have simply made wait. Applications using Serializable isolation must always be prepared to retry on serialization failures.
 
-**Source:** https://www.postgresql.org/docs/current/transaction-iso.html#XACT-SERIALIZABLE
+**Source:** <https://www.postgresql.org/docs/current/transaction-iso.html#XACT-SERIALIZABLE>
 
 <AnkiTags isolation-levels SSI serializability PostgreSQL advanced/>
 
@@ -494,7 +498,7 @@ COMMIT;
 
 Both are protective mechanisms against runaway or stuck queries, but they guard against different problems.
 
-**Statement timeout:** aborts a query if it runs longer than a threshold, regardless of *why* it's slow (e.g. a full table scan, a complex join, or being blocked on a lock).
+**Statement timeout:** aborts a query if it runs longer than a threshold, regardless of _why_ it's slow (e.g. a full table scan, a complex join, or being blocked on a lock).
 
 ```sql
 SET statement_timeout = '5s';  -- PostgreSQL: abort any statement after 5 seconds
@@ -514,8 +518,8 @@ statement_timeout=5s: would NOT have aborted (total time was 4s)
 
 **Why both matter in production:** a lock timeout catches contention problems early (e.g. another long transaction holding a row lock) without waiting for the full statement timeout, giving faster, more specific failure signals.
 
-**Source:** https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
-https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-LOCK-TIMEOUT
+**Source:** <https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT>
+<https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-LOCK-TIMEOUT>
 
 <AnkiTags locking timeouts concurrency-control intermediate advanced/>
 
@@ -527,7 +531,7 @@ The CAP theorem, proposed by Eric Brewer, states that a **distributed data store
 - **Availability (A):** every request receives a (non-error) response, without guarantee that it contains the most recent write.
 - **Partition tolerance (P):** the system continues to operate despite an arbitrary number of dropped or delayed messages between nodes (a network partition).
 
-**The practical framing used in interviews:** network partitions *will* happen in any real distributed system — so partition tolerance isn't really optional. The actual design choice CAP forces is: **when a partition occurs, do you sacrifice consistency or availability?**
+**The practical framing used in interviews:** network partitions _will_ happen in any real distributed system — so partition tolerance isn't really optional. The actual design choice CAP forces is: **when a partition occurs, do you sacrifice consistency or availability?**
 
 ```
 Partition occurs between two data centers:
@@ -540,8 +544,8 @@ AP choice: keep serving requests on both sides, potentially with stale or
            (availability preserved, consistency sacrificed)
 ```
 
-**Source:** https://dl.acm.org/doi/10.1145/564585.564601
-https://www.glassbeam.com/sites/all/themes/glassbeam/images/blog/10.1.1.67.6951.pdf
+**Source:** <https://dl.acm.org/doi/10.1145/564585.564601>
+<https://www.glassbeam.com/sites/all/themes/glassbeam/images/blog/10.1.1.67.6951.pdf>
 
 <AnkiTags CAP distributed-systems fundamentals intermediate/>
 
@@ -549,11 +553,11 @@ https://www.glassbeam.com/sites/all/themes/glassbeam/images/blog/10.1.1.67.6951.
 
 These two C's are commonly confused because they share a name, but they describe entirely different guarantees.
 
-| | ACID Consistency | CAP Consistency |
-|---|---|---|
-| **Scope** | A single transaction on a single node | Reads across multiple nodes/replicas in a distributed system |
-| **Guarantee** | Transactions only move the database between states that satisfy defined constraints (foreign keys, checks, uniqueness) | Every read sees the most recent write, regardless of which replica answers |
-| **Violated by** | A bad transaction bypassing application logic | Replication lag causing a stale read from a lagging replica |
+|                 | ACID Consistency                                                                                                       | CAP Consistency                                                            |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **Scope**       | A single transaction on a single node                                                                                  | Reads across multiple nodes/replicas in a distributed system               |
+| **Guarantee**   | Transactions only move the database between states that satisfy defined constraints (foreign keys, checks, uniqueness) | Every read sees the most recent write, regardless of which replica answers |
+| **Violated by** | A bad transaction bypassing application logic                                                                          | Replication lag causing a stale read from a lagging replica                |
 
 ```
 ACID consistency example: a CHECK constraint prevents a negative balance,
@@ -567,8 +571,8 @@ CAP consistency example:  Node A has the latest write; Node B hasn't
 
 A system can have perfect ACID consistency on every individual node while still being CAP-inconsistent across nodes due to replication lag.
 
-**Source:** https://www.postgresql.org/docs/current/ddl-constraints.html
-https://dl.acm.org/doi/10.1145/564585.564601
+**Source:** <https://www.postgresql.org/docs/current/ddl-constraints.html>
+<https://dl.acm.org/doi/10.1145/564585.564601>
 
 <AnkiTags CAP ACID common-confusion distributed-systems intermediate advanced/>
 
@@ -595,7 +599,7 @@ PA/EC — Prioritizes availability during partitions but consistency otherwise.
 
 **Why it matters more than CAP for real system design:** most of the time, there's no partition — so the latency/consistency trade-off a system makes during normal operation (e.g. whether a write must be acknowledged by all replicas before returning) affects users far more often than the rare partition event CAP focuses on.
 
-**Source:** https://www.cs.umd.edu/~abadi/papers/abadi-pacelc.pdf
+**Source:** <https://www.cs.umd.edu/~abadi/papers/abadi-pacelc.pdf>
 
 <AnkiTags PACELC CAP distributed-systems advanced/>
 
@@ -603,12 +607,12 @@ PA/EC — Prioritizes availability during partitions but consistency otherwise.
 
 BASE is an alternative set of guarantees, common in NoSQL systems, that intentionally trades strict correctness for **availability and scalability**.
 
-| | ACID | BASE |
-|---|---|---|
-| **B**asically Available | — | The system guarantees availability, even under failure, possibly returning stale or partial data |
-| **S**oft state | — | The system's state may change over time even without new input, as replicas converge |
-| **E**ventual consistency | — | Given enough time without new writes, all replicas will converge to the same value |
-| Underlying philosophy | Strong guarantees, pessimistic about conflicts | Availability first, optimistic that conflicts can be resolved later |
+|                          | ACID                                           | BASE                                                                                             |
+| ------------------------ | ---------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **B**asically Available  | —                                              | The system guarantees availability, even under failure, possibly returning stale or partial data |
+| **S**oft state           | —                                              | The system's state may change over time even without new input, as replicas converge             |
+| **E**ventual consistency | —                                              | Given enough time without new writes, all replicas will converge to the same value               |
+| Underlying philosophy    | Strong guarantees, pessimistic about conflicts | Availability first, optimistic that conflicts can be resolved later                              |
 
 ```
 ACID system (e.g. PostgreSQL primary):
@@ -622,7 +626,7 @@ BASE system (e.g. Cassandra, DynamoDB):
 
 **Where each fits:** ACID for financial transactions, inventory counts, anything requiring strict correctness. BASE for activity feeds, view counters, product catalogs, shopping carts — domains that tolerate brief staleness in exchange for always being responsive.
 
-**Source:** https://www.allthingsdistributed.com/2007/12/eventually_consistent.html
+**Source:** <https://www.allthingsdistributed.com/2007/12/eventually_consistent.html>
 
 <AnkiTags BASE ACID NoSQL eventual-consistency intermediate/>
 
@@ -639,11 +643,12 @@ t=6: A read from replica 2 now returns "X=5" — converged
 ```
 
 **Important nuance:** eventual consistency says nothing about ordering, causality, or how stale a read can be — it's a fairly weak guarantee on its own. Real systems typically layer stronger guarantees on top, such as:
+
 - **Read-your-writes consistency:** a client always sees its own writes, even if other clients might see stale data.
 - **Monotonic reads:** once a client has seen a value, it never sees an older value on a subsequent read.
 - **Causal consistency:** operations that are causally related are seen by everyone in the same order.
 
-**Source:** https://www.allthingsdistributed.com/2007/12/eventually_consistent.html
+**Source:** <https://www.allthingsdistributed.com/2007/12/eventually_consistent.html>
 
 <AnkiTags eventual-consistency consistency-models distributed-systems intermediate/>
 
@@ -651,11 +656,11 @@ t=6: A read from replica 2 now returns "X=5" — converged
 
 These represent points along a spectrum from strictest to weakest guarantee:
 
-| Model | Guarantee | Cost |
-|---|---|---|
-| **Strong consistency** (linearizability) | Every read sees the latest write, as if there were only one copy of the data | Highest latency; often requires coordination (quorum, consensus) on every operation |
-| **Causal consistency** | Operations that are causally related (e.g. a reply to a comment) are seen by all observers in the same order; unrelated operations can be seen in any order | Requires tracking causal dependencies (e.g. via vector clocks), but allows more concurrency than strong consistency |
-| **Eventual consistency** | All replicas converge given enough time and no new writes; no ordering or recency guarantee in the meantime | Lowest latency, highest availability; weakest guarantee |
+| Model                                    | Guarantee                                                                                                                                                   | Cost                                                                                                                |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Strong consistency** (linearizability) | Every read sees the latest write, as if there were only one copy of the data                                                                                | Highest latency; often requires coordination (quorum, consensus) on every operation                                 |
+| **Causal consistency**                   | Operations that are causally related (e.g. a reply to a comment) are seen by all observers in the same order; unrelated operations can be seen in any order | Requires tracking causal dependencies (e.g. via vector clocks), but allows more concurrency than strong consistency |
+| **Eventual consistency**                 | All replicas converge given enough time and no new writes; no ordering or recency guarantee in the meantime                                                 | Lowest latency, highest availability; weakest guarantee                                                             |
 
 ```
 Example — a social media comment thread:
@@ -673,7 +678,7 @@ Eventual consistency: comments eventually show up for everyone, but a reply
 
 **Choosing between them:** causal consistency is often the practical sweet spot for collaborative or social applications — it preserves the orderings users actually notice (cause-and-effect) without paying for full strong consistency.
 
-**Source:** https://www.allthingsdistributed.com/2007/12/eventually_consistent.html
+**Source:** <https://www.allthingsdistributed.com/2007/12/eventually_consistent.html>
 
 <AnkiTags consistency-models causal-consistency distributed-systems intermediate advanced/>
 
@@ -701,8 +706,8 @@ W = 1, R = 1  → fastest possible, but reads can return stale data
 
 **The key formula:** if **W + R > N**, every read is guaranteed to overlap with at least one node holding the latest write, giving strong consistency. If `W + R ≤ N`, reads might miss the latest write entirely.
 
-**Source:** https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html
-https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html
+**Source:** <https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html>
+<https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html>
 
 <AnkiTags quorum consistency-models distributed-systems Cassandra DynamoDB advanced/>
 
@@ -727,7 +732,7 @@ Comparing two vector clocks:
 
 **Why it matters:** in an eventually-consistent, multi-writer system (e.g. Dynamo-style databases), two replicas might receive conflicting writes to the same key. Vector clocks let the system distinguish "this write supersedes that one" from "these are genuinely conflicting writes that need application-level resolution" (e.g. shopping cart merge logic, or last-write-wins, or CRDTs).
 
-**Source:** https://www.allthingsdistributed.com/2007/10/amazons_dynamo.html
+**Source:** <https://www.allthingsdistributed.com/2007/10/amazons_dynamo.html>
 
 <AnkiTags vector-clocks causal-consistency conflict-resolution distributed-systems advanced/>
 
@@ -749,7 +754,7 @@ LWW resolution: keep the write at t=101 → cart_items = ["shoes", "hat"]
 
 **Alternatives:** CRDTs (Conflict-free Replicated Data Types) merge concurrent writes intelligently (e.g. a set-union for a shopping cart) instead of discarding one side; application-level merge logic; or surfacing the conflict to the user.
 
-**Source:** https://www.allthingsdistributed.com/2007/10/amazons_dynamo.html
+**Source:** <https://www.allthingsdistributed.com/2007/10/amazons_dynamo.html>
 
 <AnkiTags conflict-resolution last-write-wins eventual-consistency distributed-systems advanced/>
 
@@ -776,7 +781,7 @@ Example — an OR-Set (observed-remove set) CRDT used for shopping carts:
 
 **Why this matters:** CRDTs let multi-writer, eventually-consistent systems avoid the silent-data-loss problem of last-write-wins, at the cost of being limited to specific data structures (counters, sets, sequences) that have well-defined merge semantics — you can't make an arbitrary JSON document into a CRDT for free.
 
-**Source:** https://hal.inria.fr/inria-00609399/document
+**Source:** <https://hal.inria.fr/inria-00609399/document>
 
 <AnkiTags CRDT conflict-resolution distributed-systems advanced/>
 
@@ -785,6 +790,7 @@ Example — an OR-Set (observed-remove set) CRDT used for shopping carts:
 Normalization is the process of structuring relational tables to **reduce data redundancy** and prevent certain classes of update anomalies, by progressively enforcing stricter rules.
 
 **1NF (First Normal Form):** every column holds a single, atomic value — no repeating groups or arrays in a single column.
+
 ```
 Violates 1NF:                          Satisfies 1NF:
 | id | phones           |              | id | phone        |
@@ -793,6 +799,7 @@ Violates 1NF:                          Satisfies 1NF:
 ```
 
 **2NF (Second Normal Form):** must be in 1NF, and every non-key column must depend on the **entire** primary key, not just part of it (relevant for composite keys).
+
 ```
 Violates 2NF (composite key: order_id + product_id):    Satisfies 2NF:
 | order_id | product_id | product_name | quantity |      Split into:
@@ -801,6 +808,7 @@ Violates 2NF (composite key: order_id + product_id):    Satisfies 2NF:
 ```
 
 **3NF (Third Normal Form):** must be in 2NF, and no non-key column may depend on another **non-key** column (no transitive dependency).
+
 ```
 Violates 3NF:                                  Satisfies 3NF:
 | emp_id | dept_id | dept_location |           employees(emp_id, dept_id)
@@ -810,7 +818,7 @@ Violates 3NF:                                  Satisfies 3NF:
 
 These forms were originally defined by E.F. Codd in his foundational relational model papers.
 
-**Source:** https://dl.acm.org/doi/10.1145/362384.362685
+**Source:** <https://dl.acm.org/doi/10.1145/362384.362685>
 
 <AnkiTags normalization 1NF 2NF 3NF schema-design intermediate/>
 
@@ -838,7 +846,7 @@ Fix: split into
 
 **Trade-off:** BCNF eliminates more redundancy than 3NF but can occasionally make certain multi-attribute constraints harder to enforce declaratively — in practice, most schemas stop at 3NF unless a specific BCNF violation is identified.
 
-**Source:** https://dl.acm.org/doi/10.1145/356635.356646
+**Source:** <https://dl.acm.org/doi/10.1145/356635.356646>
 
 <AnkiTags normalization BCNF 3NF schema-design advanced/>
 
@@ -861,7 +869,7 @@ dept_name into its own table keyed by dept_id.
 
 **Why this matters:** every normal form is defined in terms of functional dependencies — identifying them is the actual analytical work of normalization. Without correctly identifying functional dependencies in your data, you can't determine whether a schema is in 2NF, 3NF, or BCNF.
 
-**Source:** https://dl.acm.org/doi/10.1145/362384.362685
+**Source:** <https://dl.acm.org/doi/10.1145/362384.362685>
 
 <AnkiTags functional-dependencies normalization schema-design intermediate/>
 
@@ -893,7 +901,7 @@ Super key — ANY set of columns that uniquely identifies a row, including
 
 **Composite key:** a candidate key (or primary key) made of **more than one column**, where no single column alone is unique — e.g. `{student_id, course_id}` in an enrollment table.
 
-**Source:** https://dl.acm.org/doi/10.1145/362384.362685
+**Source:** <https://dl.acm.org/doi/10.1145/362384.362685>
 
 <AnkiTags keys candidate-key primary-key schema-design junior intermediate/>
 
@@ -914,26 +922,27 @@ Denormalized:
 ```
 
 **When it's worth it:**
+
 - **Read-heavy, write-light workloads** (analytics dashboards, reporting) where avoiding expensive joins on every read outweighs the cost of occasionally updating redundant copies.
 - **OLAP systems** generally favor denormalized (often star-schema) designs for query simplicity and speed.
 - **OLTP systems** generally favor normalized designs, since they have frequent writes and normalization keeps those writes simple and consistent.
 
 **The risk:** every denormalized copy of data is a place where inconsistency can creep in if updates aren't applied everywhere consistently — denormalization trades data integrity guarantees for read speed, and that trade should be deliberate, not accidental.
 
-**Source:** https://www.postgresql.org/docs/current/ddl-constraints.html
+**Source:** <https://www.postgresql.org/docs/current/ddl-constraints.html>
 
 <AnkiTags denormalization normalization schema-design OLTP OLAP intermediate/>
 
 # What is the difference between OLTP and OLAP database workloads?
 
-| | OLTP (Online Transaction Processing) | OLAP (Online Analytical Processing) |
-|---|---|---|
-| **Purpose** | Day-to-day operational transactions | Historical analysis, reporting, business intelligence |
-| **Query pattern** | Many small reads/writes, single-row lookups | Few large queries, scanning/aggregating millions of rows |
-| **Schema** | Normalized (3NF) — minimizes write anomalies | Denormalized (star/snowflake schema) — optimizes read speed |
-| **Examples** | Order placement, inventory updates, user login | Monthly sales trends, cohort analysis, dashboards |
-| **Typical tech** | PostgreSQL, MySQL, DynamoDB | Snowflake, BigQuery, Redshift, ClickHouse |
-| **Optimized for** | Low-latency point queries, high write throughput | High-throughput scans, complex aggregations |
+|                   | OLTP (Online Transaction Processing)             | OLAP (Online Analytical Processing)                         |
+| ----------------- | ------------------------------------------------ | ----------------------------------------------------------- |
+| **Purpose**       | Day-to-day operational transactions              | Historical analysis, reporting, business intelligence       |
+| **Query pattern** | Many small reads/writes, single-row lookups      | Few large queries, scanning/aggregating millions of rows    |
+| **Schema**        | Normalized (3NF) — minimizes write anomalies     | Denormalized (star/snowflake schema) — optimizes read speed |
+| **Examples**      | Order placement, inventory updates, user login   | Monthly sales trends, cohort analysis, dashboards           |
+| **Typical tech**  | PostgreSQL, MySQL, DynamoDB                      | Snowflake, BigQuery, Redshift, ClickHouse                   |
+| **Optimized for** | Low-latency point queries, high write throughput | High-throughput scans, complex aggregations                 |
 
 ```
 OLTP query:  SELECT * FROM orders WHERE order_id = 12345;
@@ -947,13 +956,13 @@ OLAP query:  SELECT region, SUM(revenue) FROM sales
 
 **Why the distinction matters architecturally:** trying to run heavy OLAP-style analytical queries directly against an OLTP production database can degrade performance for the transactional workload it's meant to serve — this is why companies typically maintain a separate data warehouse, fed by ETL/CDC pipelines, for analytics.
 
-**Source:** https://www.postgresql.org/docs/current/queries-overview.html
+**Source:** <https://www.postgresql.org/docs/current/queries-overview.html>
 
 <AnkiTags OLTP OLAP schema-design data-warehouse intermediate/>
 
 # What is a write-ahead log (WAL) and why is it central to database durability and crash recovery?
 
-A write-ahead log records every change **before** it's applied to the actual data files, as a sequential append-only log. The core rule: a change must be durably written to the WAL *before* the corresponding data page is modified.
+A write-ahead log records every change **before** it's applied to the actual data files, as a sequential append-only log. The core rule: a change must be durably written to the WAL _before_ the corresponding data page is modified.
 
 ```
 Transaction commits:
@@ -967,7 +976,7 @@ Transaction commits:
 
 **Bonus benefits:** WAL also enables efficient replication (replicas can apply the same log stream) and point-in-time recovery (replaying the log up to a specific timestamp).
 
-**Source:** https://www.postgresql.org/docs/current/wal-intro.html
+**Source:** <https://www.postgresql.org/docs/current/wal-intro.html>
 
 <AnkiTags WAL storage-internals durability crash-recovery intermediate/>
 
@@ -976,6 +985,7 @@ Transaction commits:
 Both are data structures used to organize on-disk storage for fast lookups, but they make very different trade-offs between read and write performance.
 
 **B-tree (used by PostgreSQL, MySQL/InnoDB, most traditional RDBMSs):**
+
 ```
 - Data is stored in sorted pages forming a balanced tree.
 - Writes modify pages IN PLACE — find the right leaf page, update it.
@@ -986,6 +996,7 @@ Both are data structures used to organize on-disk storage for fast lookups, but 
 ```
 
 **LSM-tree (used by Cassandra, RocksDB, LevelDB, and as an option in some others):**
+
 ```
 - Writes are appended sequentially to an in-memory structure (memtable),
   then periodically flushed to disk as immutable, sorted files (SSTables).
@@ -999,8 +1010,8 @@ Both are data structures used to organize on-disk storage for fast lookups, but 
 
 **Rule of thumb:** B-trees favor read-heavy workloads with in-place updates; LSM-trees favor write-heavy workloads (logging, time-series, high-ingest systems) at some cost to read latency.
 
-**Source:** https://www.postgresql.org/docs/current/btree.html
-https://github.com/facebook/rocksdb/wiki/Rocksdb-Architecture-Guide
+**Source:** <https://www.postgresql.org/docs/current/btree.html>
+<https://github.com/facebook/rocksdb/wiki/Rocksdb-Architecture-Guide>
 
 <AnkiTags storage-internals B-tree LSM-tree performance advanced/>
 
@@ -1022,9 +1033,9 @@ With a Bloom filter (one per SSTable):
   dramatically reducing unnecessary disk I/O.
 ```
 
-**How it works internally:** a Bloom filter is a bit array plus several hash functions. Inserting a key sets several bits (based on hashing the key multiple ways); checking a key tests whether all those same bits are set. If any required bit is 0, the key is definitely absent. If all are 1, the key is *probably* present (could be a coincidental overlap from other keys — a false positive).
+**How it works internally:** a Bloom filter is a bit array plus several hash functions. Inserting a key sets several bits (based on hashing the key multiple ways); checking a key tests whether all those same bits are set. If any required bit is 0, the key is definitely absent. If all are 1, the key is _probably_ present (could be a coincidental overlap from other keys — a false positive).
 
-**Source:** https://github.com/facebook/rocksdb/wiki/RocksDB-Bloom-Filter
+**Source:** <https://github.com/facebook/rocksdb/wiki/RocksDB-Bloom-Filter>
 
 <AnkiTags storage-internals bloom-filter LSM-tree performance advanced/>
 
@@ -1053,7 +1064,7 @@ Write request:
 SHOW shared_buffers;
 ```
 
-**Source:** https://www.postgresql.org/docs/current/runtime-config-resource.html#GUC-SHARED-BUFFERS
+**Source:** <https://www.postgresql.org/docs/current/runtime-config-resource.html#GUC-SHARED-BUFFERS>
 
 <AnkiTags storage-internals buffer-pool page-cache performance intermediate/>
 
@@ -1086,8 +1097,8 @@ location) as their "pointer," since
 rows can move during clustered re-sorts
 ```
 
-**Source:** https://www.postgresql.org/docs/current/storage-page-layout.html
-https://dev.mysql.com/doc/refman/8.0/en/innodb-index-types.html
+**Source:** <https://www.postgresql.org/docs/current/storage-page-layout.html>
+<https://dev.mysql.com/doc/refman/8.0/en/innodb-index-types.html>
 
 <AnkiTags storage-internals heap-file clustered-index B-tree advanced/>
 
@@ -1109,7 +1120,7 @@ Single DB node                 Primary (writes) ──┬──► Replica 1 (re
 
 **The fundamental trade-off replication introduces:** keeping replicas in sync costs either **latency** (waiting for replicas to confirm before acknowledging a write) or **consistency** (acknowledging immediately, accepting that replicas may briefly lag behind). This is exactly the trade-off explored by CAP/PACELC.
 
-**Source:** https://www.postgresql.org/docs/current/high-availability.html
+**Source:** <https://www.postgresql.org/docs/current/high-availability.html>
 
 <AnkiTags replication distributed-systems fundamentals junior intermediate/>
 
@@ -1143,13 +1154,14 @@ without ever having seen it.
 
 **Common middle ground — "semi-synchronous":** wait for at least **one** replica to confirm (not all), balancing some durability guarantee against not paying the full latency cost of waiting for every replica.
 
-**Source:** https://www.postgresql.org/docs/current/warm-standby.html#SYNCHRONOUS-REPLICATION
+**Source:** <https://www.postgresql.org/docs/current/warm-standby.html#SYNCHRONOUS-REPLICATION>
 
 <AnkiTags replication synchronous-replication asynchronous-replication intermediate advanced/>
 
 # What is the difference between leader-follower, multi-leader, and leaderless replication?
 
 **Leader-follower (primary-replica):** one node (the leader) accepts all writes; followers replicate from it and typically serve only reads.
+
 ```
 Writes → Leader → replicated to → Follower 1, Follower 2, ...
 Simple to reason about. Single point of write contention; failover
@@ -1157,6 +1169,7 @@ requires promoting a follower (briefly unavailable for writes during this).
 ```
 
 **Multi-leader:** multiple nodes can each accept writes independently, then replicate to each other.
+
 ```
 Writes → Leader A (datacenter 1)  ─┐
 Writes → Leader B (datacenter 2)  ─┴─► replicate to each other
@@ -1167,6 +1180,7 @@ or application-level merge logic).
 ```
 
 **Leaderless (Dynamo-style):** any replica can accept a write; consistency is achieved via quorum reads/writes (W + R > N) rather than a designated leader.
+
 ```
 Client writes to multiple replicas directly (or via a coordinator);
 no single node is "the" authority. Highly available — no leader
@@ -1174,14 +1188,14 @@ election needed on failure. Requires read-repair / anti-entropy
 processes to resolve replicas that fall out of sync.
 ```
 
-| | Leader-follower | Multi-leader | Leaderless |
-|---|---|---|---|
-| Write conflicts? | No (single writer) | Yes — needs resolution | Yes — needs resolution |
-| Failover complexity | Moderate (promote a follower) | N/A (no single leader to lose) | N/A (no leader) |
-| Example systems | PostgreSQL streaming replication, MySQL | Multi-region CouchDB, some MySQL setups | Cassandra, DynamoDB, Riak |
+|                     | Leader-follower                         | Multi-leader                            | Leaderless                |
+| ------------------- | --------------------------------------- | --------------------------------------- | ------------------------- |
+| Write conflicts?    | No (single writer)                      | Yes — needs resolution                  | Yes — needs resolution    |
+| Failover complexity | Moderate (promote a follower)           | N/A (no single leader to lose)          | N/A (no leader)           |
+| Example systems     | PostgreSQL streaming replication, MySQL | Multi-region CouchDB, some MySQL setups | Cassandra, DynamoDB, Riak |
 
-**Source:** https://www.postgresql.org/docs/current/high-availability.html
-https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html
+**Source:** <https://www.postgresql.org/docs/current/high-availability.html>
+<https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html>
 
 <AnkiTags replication leader-follower multi-leader leaderless distributed-systems intermediate advanced/>
 
@@ -1200,19 +1214,20 @@ even though the write already succeeded on the primary 1 second earlier.
 ```
 
 **Real-world problems this causes:**
+
 - **Read-after-write violations:** a user submits a form, then immediately reloads the page and sees their own change missing, because the read was routed to a lagging replica.
-- **Monotonic read violations:** a user refreshes twice and sees a *newer* value, then an *older* value, if the second read happens to hit a more-lagged replica than the first.
+- **Monotonic read violations:** a user refreshes twice and sees a _newer_ value, then an _older_ value, if the second read happens to hit a more-lagged replica than the first.
 - **Inconsistent cross-entity reads:** reading two related pieces of data from different replicas with different lag can produce a combination that never actually existed together.
 
 **Common mitigations:** route a user's own reads to the primary for some window after they write (read-your-writes); track replica lag and route reads away from replicas that fall too far behind; use causal/session consistency tokens.
 
-**Source:** https://www.postgresql.org/docs/current/warm-standby.html
+**Source:** <https://www.postgresql.org/docs/current/warm-standby.html>
 
 <AnkiTags replication replication-lag consistency-models intermediate advanced/>
 
 # What is database sharding (horizontal partitioning)?
 
-Sharding splits a single logical dataset across **multiple independent database instances** ("shards"), where each shard holds a disjoint subset of the rows — as opposed to replication, where each node holds a copy of the *same* data.
+Sharding splits a single logical dataset across **multiple independent database instances** ("shards"), where each shard holds a disjoint subset of the rows — as opposed to replication, where each node holds a copy of the _same_ data.
 
 ```
 Unsharded:                         Sharded by user_id range:
@@ -1226,13 +1241,14 @@ Single DB: all users 1-10,000,000  Shard 1: users 1–2,500,000
 
 **The core complexity sharding introduces:** queries that need data from multiple shards (cross-shard joins, global aggregates, multi-shard transactions) become significantly harder and slower than the equivalent query on an unsharded database — this complexity is the main reason engineers avoid sharding until it's actually necessary.
 
-**Source:** https://www.mongodb.com/docs/manual/sharding/
+**Source:** <https://www.mongodb.com/docs/manual/sharding/>
 
 <AnkiTags sharding partitioning scaling distributed-systems intermediate/>
 
 # What is the difference between horizontal and vertical partitioning?
 
 **Horizontal partitioning (sharding):** splits a table by **rows** — each partition has the same columns but a different subset of rows.
+
 ```
 users table split by user_id range:
 Shard 1: rows where user_id < 1,000,000   (all columns)
@@ -1240,6 +1256,7 @@ Shard 2: rows where user_id >= 1,000,000  (all columns)
 ```
 
 **Vertical partitioning:** splits a table by **columns** — each partition has the same rows but a different subset of columns, often separating frequently-accessed columns from rarely-accessed ones.
+
 ```
 users table split by column groups:
 Partition A: user_id, name, email          (accessed on every request)
@@ -1250,13 +1267,14 @@ Partition B: user_id, bio, profile_photo   (accessed only on profile page)
 
 **They're often combined:** a large system might vertically partition a table into a "hot" and "cold" set of columns, then horizontally shard the hot set across many machines for scale.
 
-**Source:** https://www.postgresql.org/docs/current/ddl-partitioning.html
+**Source:** <https://www.postgresql.org/docs/current/ddl-partitioning.html>
 
 <AnkiTags partitioning sharding schema-design scaling intermediate/>
 
 # What are the main sharding strategies (range, hash, and geographic), and what's the trade-off between them?
 
 **Range-based sharding:** assign contiguous ranges of the shard key to each shard.
+
 ```
 Shard 1: user_id 1 – 1,000,000
 Shard 2: user_id 1,000,001 – 2,000,000
@@ -1268,6 +1286,7 @@ Con: prone to HOTSPOTS — if shard keys are sequential (auto-increment IDs,
 ```
 
 **Hash-based sharding:** apply a hash function to the shard key, then assign based on the hash value (often via consistent hashing).
+
 ```
 shard = hash(user_id) % num_shards
 
@@ -1279,6 +1298,7 @@ Con: range queries become impossible to satisfy from one shard — a query
 ```
 
 **Geographic/directory-based sharding:** assign shards based on a real-world attribute, often via an explicit lookup ("directory") rather than a pure function.
+
 ```
 Shard EU: customers in European Union (data residency requirement)
 Shard US: customers in the United States
@@ -1292,7 +1312,7 @@ Con: uneven shard sizes if user distribution across regions is skewed;
 
 **The core trade-off across all strategies:** write distribution (avoiding hotspots) vs. read locality (keeping related data queryable from a single shard) — optimizing one tends to hurt the other.
 
-**Source:** https://www.mongodb.com/docs/manual/core/sharding-shard-key/
+**Source:** <https://www.mongodb.com/docs/manual/core/sharding-shard-key/>
 
 <AnkiTags sharding partitioning shard-key scaling intermediate advanced/>
 
@@ -1319,7 +1339,7 @@ Good shard key: hash(customer_id) — high cardinality, even spread,
 
 **The hardest part in practice:** a shard key that's good for today's query patterns and traffic distribution may become wrong as the application evolves — re-sharding an already-large dataset is a major operational undertaking.
 
-**Source:** https://www.mongodb.com/docs/manual/core/sharding-shard-key/
+**Source:** <https://www.mongodb.com/docs/manual/core/sharding-shard-key/>
 
 <AnkiTags sharding shard-key scaling schema-design advanced/>
 
@@ -1352,7 +1372,7 @@ key B → shard 0        key B → shard 3   (moved)
 
 **Operational difficulty beyond the data movement itself:** rebalancing must typically happen **without downtime**, meaning the system needs to serve reads/writes correctly while some keys are mid-migration — usually handled via dual-write/dual-read periods or a migration coordinator that tracks which keys have moved.
 
-**Source:** https://www.mongodb.com/docs/manual/core/sharding-balancer-administration/
+**Source:** <https://www.mongodb.com/docs/manual/core/sharding-balancer-administration/>
 
 <AnkiTags sharding rebalancing consistent-hashing scaling advanced/>
 
@@ -1372,6 +1392,7 @@ Shard B then crashes before committing? Money has vanished.
 ```
 
 **The classic solution — Two-Phase Commit (2PC):**
+
 ```
 Phase 1 (prepare): a coordinator asks every participant "can you commit?"
                     each participant locks resources and replies yes/no
@@ -1384,7 +1405,7 @@ Phase 2 (commit):   if ALL replied yes, coordinator tells everyone to commit;
 
 **Common alternative in practice:** avoid distributed transactions by designing the shard key so that data needing transactional consistency together always lives on the **same shard** (e.g. shard by `account_id`, ensuring a transfer between two of the same user's accounts stays local).
 
-**Source:** https://www.postgresql.org/docs/current/sql-prepare-transaction.html
+**Source:** <https://www.postgresql.org/docs/current/sql-prepare-transaction.html>
 
 <AnkiTags distributed-transactions two-phase-commit sharding advanced/>
 
@@ -1397,6 +1418,7 @@ Both are **consensus algorithms** — protocols that let a cluster of nodes agre
 **Paxos** (Lamport, 1998): the foundational consensus algorithm, mathematically proven correct, but notoriously difficult to understand and implement correctly — its original presentation is famously dense, and most real systems use heavily adapted variants (Multi-Paxos) rather than the base algorithm directly.
 
 **Raft** (Ongaro & Ousterhout, 2014): designed explicitly as a more **understandable** alternative to Paxos, while providing equivalent guarantees. It decomposes consensus into three clearer sub-problems:
+
 ```
 1. Leader election — nodes vote; a candidate becomes leader with a
    majority of votes for a given "term" (logical clock for elections)
@@ -1409,7 +1431,7 @@ Both are **consensus algorithms** — protocols that let a cluster of nodes agre
 
 **Why this matters for backend engineers:** etcd, Consul, CockroachDB, and many other systems used for distributed coordination and leader election are built on Raft specifically because of its relative implementability and well-documented correctness properties.
 
-**Source:** https://raft.github.io/raft.pdf
+**Source:** <https://raft.github.io/raft.pdf>
 
 <AnkiTags consensus Raft Paxos distributed-systems advanced/>
 
@@ -1439,18 +1461,18 @@ Node A isolated alone:        1/3 — NOT a majority → A steps down, refuses w
 Nodes B+C together:           2/3 — IS a majority → may elect a new leader safely
 ```
 
-**Source:** https://raft.github.io/raft.pdf
+**Source:** <https://raft.github.io/raft.pdf>
 
 <AnkiTags split-brain consensus availability distributed-systems advanced/>
 
 # What are the main NoSQL database categories, and what is each optimized for?
 
-| Category | Data model | Optimized for | Examples |
-|---|---|---|---|
-| **Key-value** | Opaque value retrieved by a single key | Simple, extremely fast lookups; caching | Redis, DynamoDB, Riak |
-| **Document** | Semi-structured documents (JSON/BSON), can be queried by internal fields | Flexible schemas, nested/hierarchical data | MongoDB, Couchbase |
-| **Column-family (wide-column)** | Rows with dynamic, sparse sets of columns, grouped into column families | Very high write throughput, time-series, wide sparse data | Cassandra, HBase, Bigtable |
-| **Graph** | Nodes and edges with properties, optimized for traversal | Highly connected data — social graphs, recommendation engines, fraud detection | Neo4j, Amazon Neptune |
+| Category                        | Data model                                                               | Optimized for                                                                  | Examples                   |
+| ------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | -------------------------- |
+| **Key-value**                   | Opaque value retrieved by a single key                                   | Simple, extremely fast lookups; caching                                        | Redis, DynamoDB, Riak      |
+| **Document**                    | Semi-structured documents (JSON/BSON), can be queried by internal fields | Flexible schemas, nested/hierarchical data                                     | MongoDB, Couchbase         |
+| **Column-family (wide-column)** | Rows with dynamic, sparse sets of columns, grouped into column families  | Very high write throughput, time-series, wide sparse data                      | Cassandra, HBase, Bigtable |
+| **Graph**                       | Nodes and edges with properties, optimized for traversal                 | Highly connected data — social graphs, recommendation engines, fraud detection | Neo4j, Amazon Neptune      |
 
 ```
 Key-value:    GET user:1234 → {opaque blob}
@@ -1469,20 +1491,22 @@ Graph:        MATCH (a:Person)-[:FRIENDS_WITH]->(b:Person)
 
 **Why "NoSQL" is a fairly unhelpful umbrella term:** these four categories solve genuinely different problems and make different trade-offs — there's no single unifying property beyond "not the traditional relational/SQL model."
 
-**Source:** https://www.mongodb.com/resources/basics/databases/nosql-explained
-https://cassandra.apache.org/doc/latest/cassandra/data_modeling/index.html
+**Source:** <https://www.mongodb.com/resources/basics/databases/nosql-explained>
+<https://cassandra.apache.org/doc/latest/cassandra/data_modeling/index.html>
 
 <AnkiTags NoSQL key-value document column-family graph-database intermediate/>
 
 # When would you choose a relational (SQL) database over a NoSQL database, and vice versa?
 
 **Favor a relational database when:**
+
 - Data has clear, stable relationships that benefit from joins (orders ↔ customers ↔ products).
 - You need strong transactional guarantees (ACID) across multiple related entities — e.g. financial systems.
 - Your query patterns are varied and ad hoc — relational databases let you query by any column/combination without redesigning the schema.
 - Data integrity constraints (foreign keys, uniqueness, check constraints) should be enforced by the database itself, not solely by application code.
 
 **Favor a NoSQL database when:**
+
 - You need to scale writes horizontally beyond what a single (even well-tuned) relational primary can handle, and the data model tolerates it (e.g. sharding-friendly access patterns).
 - The schema is genuinely variable or evolves frequently per-record (different documents have different fields).
 - Your access pattern is overwhelmingly simple key-based lookups, and you want to trade query flexibility for raw lookup speed (key-value stores).
@@ -1502,7 +1526,7 @@ Good fit for NoSQL:      session storage (key-value), product catalog
 
 **The honest middle ground:** most production systems at scale use **both** — a relational primary store for the core transactional data, plus one or more NoSQL stores for specific access patterns (caching, search, time-series, graph traversal) that the relational store isn't well-suited for.
 
-**Source:** https://www.mongodb.com/resources/basics/databases/nosql-explained
+**Source:** <https://www.mongodb.com/resources/basics/databases/nosql-explained>
 
 <AnkiTags SQL NoSQL schema-design decision-making intermediate/>
 
@@ -1528,13 +1552,14 @@ Recovery process:
 
 **Why this is more powerful than restoring from a nightly backup alone:** a nightly backup only lets you go back to fixed snapshot times (e.g. "as of last midnight"), losing all changes since then. PITR lets you recover to **any second**, as long as the WAL archive covers that period — minimizing data loss to seconds or minutes rather than up to a full day.
 
-**Source:** https://www.postgresql.org/docs/current/continuous-archiving.html
+**Source:** <https://www.postgresql.org/docs/current/continuous-archiving.html>
 
 <AnkiTags backup-recovery PITR WAL disaster-recovery intermediate advanced/>
 
 # What is the difference between a full backup, an incremental backup, and a snapshot?
 
 **Full backup:** a complete copy of the entire dataset at a point in time.
+
 ```
 Pro: simplest to restore from — just one file/set to recover.
 Con: slow to create and store for large datasets; wasteful if most
@@ -1542,6 +1567,7 @@ Con: slow to create and store for large datasets; wasteful if most
 ```
 
 **Incremental backup:** captures only the data that **changed** since the last backup (full or incremental).
+
 ```
 Sunday:    Full backup (100 GB)
 Monday:    Incremental (only the ~2 GB that changed since Sunday)
@@ -1554,6 +1580,7 @@ Con: restoring requires replaying the full backup PLUS every
 ```
 
 **Snapshot:** a near-instantaneous, often filesystem- or storage-layer point-in-time view of the data, frequently implemented via copy-on-write — the snapshot initially shares all data blocks with the live system, only diverging as blocks are modified afterward.
+
 ```
 Pro: very fast to create (doesn't copy all data immediately), commonly
      used for storage volumes (e.g. cloud block storage snapshots).
@@ -1561,7 +1588,7 @@ Con: typically tied to the specific storage system that created it;
      less portable than a full logical backup.
 ```
 
-**Source:** https://www.postgresql.org/docs/current/backup.html
+**Source:** <https://www.postgresql.org/docs/current/backup.html>
 
 <AnkiTags backup-recovery snapshot incremental-backup disaster-recovery intermediate/>
 
@@ -1578,13 +1605,14 @@ Application:
 **What it solves well:** read-heavy workloads (the vast majority of typical web applications) can scale read capacity nearly linearly by adding more replicas, without touching the application's write path at all.
 
 **What it does NOT solve:**
+
 - **Write scaling:** every replica still ultimately depends on the same single primary for all writes — adding more read replicas does nothing to help a write-bottlenecked system.
 - **Storage scaling:** every replica stores a full copy of the entire dataset — this doesn't help when the problem is the dataset no longer fitting comfortably on one machine.
 - **Strong consistency for replica reads:** reads from replicas are subject to replication lag (see the dedicated replication lag card) unless specifically routed to the primary or a synchronous replica.
 
 **When you've outgrown read replicas alone:** if writes (not reads) are the bottleneck, or if total data volume exceeds what fits well on a single primary, sharding becomes necessary — read replicas and sharding solve different scaling problems and are often used together (each shard can have its own set of read replicas).
 
-**Source:** https://www.postgresql.org/docs/current/high-availability.html
+**Source:** <https://www.postgresql.org/docs/current/high-availability.html>
 
 <AnkiTags replication read-replicas scaling intermediate/>
 
@@ -1614,7 +1642,7 @@ CQRS:
 
 **The cost:** the read model is no longer perfectly in sync with the write model in real time — there's some propagation delay (similar to replication lag), and the system now has two models to keep consistent and two code paths to maintain instead of one.
 
-**Source:** https://martinfowler.com/bliki/CQRS.html
+**Source:** <https://martinfowler.com/bliki/CQRS.html>
 
 <AnkiTags CQRS scaling architecture-patterns advanced/>
 
@@ -1637,9 +1665,9 @@ Rough rule of thumb cited by PostgreSQL maintainers:
   fleet might naively want to open
 ```
 
-**Why this surprises people coming from the application side:** an application server can often handle thousands of concurrent lightweight requests/coroutines cheaply, but the database underneath has a much lower ceiling for concurrent *active* connections before contention costs outweigh added parallelism.
+**Why this surprises people coming from the application side:** an application server can often handle thousands of concurrent lightweight requests/coroutines cheaply, but the database underneath has a much lower ceiling for concurrent _active_ connections before contention costs outweigh added parallelism.
 
-**Source:** https://www.postgresql.org/docs/current/runtime-config-connection.html#GUC-MAX-CONNECTIONS
+**Source:** <https://www.postgresql.org/docs/current/runtime-config-connection.html#GUC-MAX-CONNECTIONS>
 
 <AnkiTags connection-pooling max-connections scaling performance intermediate advanced/>
 
@@ -1661,13 +1689,14 @@ With a pooler (e.g. PgBouncer):
 ```
 
 **Pooling modes (PgBouncer-specific, but the concept generalizes):**
+
 - **Session pooling:** a DB connection is assigned to a client for the lifetime of its session — safest, but doesn't reduce connection count much.
 - **Transaction pooling:** a DB connection is assigned only for the duration of a single transaction, then returned to the pool — much higher multiplexing, but breaks session-level features like advisory locks or `SET` statements that aren't transaction-scoped.
 - **Statement pooling:** a DB connection is held only for a single statement — highest multiplexing, most restrictive (no multi-statement transactions at all).
 
 **Why this matters operationally:** as an application scales out to many instances/workers, a pooler is usually what keeps the actual database connection count manageable, rather than relying on every application instance to self-limit its own connection count perfectly.
 
-**Source:** https://www.pgbouncer.org/features.html
+**Source:** <https://www.pgbouncer.org/features.html>
 
 <AnkiTags connection-pooling PgBouncer scaling infrastructure intermediate advanced/>
 
@@ -1693,8 +1722,8 @@ lowest-estimated-cost plan — this is cost-based optimization.
 
 **What feeds the cost estimate:** row count statistics per table, the selectivity of `WHERE` predicates (what fraction of rows match), the presence and selectivity of relevant indexes, and the estimated cost of disk I/O vs. in-memory operations. These statistics are gathered by commands like `ANALYZE` and can go stale, leading the optimizer to choose a bad plan — a common real-world cause of "this query was fast yesterday and slow today."
 
-**Source:** https://www.postgresql.org/docs/current/planner-stats.html
-https://www.postgresql.org/docs/current/runtime-config-query.html
+**Source:** <https://www.postgresql.org/docs/current/planner-stats.html>
+<https://www.postgresql.org/docs/current/runtime-config-query.html>
 
 <AnkiTags query-planner cost-based-optimization storage-internals intermediate advanced/>
 
@@ -1703,6 +1732,7 @@ https://www.postgresql.org/docs/current/runtime-config-query.html
 These are the three classic algorithms a query planner chooses between to execute a `JOIN`, each with different performance characteristics depending on table sizes, indexes, and sort order.
 
 **Nested loop join:** for each row in the outer table, scan (or index-lookup) the inner table for matches.
+
 ```
 for each row in outer_table:
     for each row in inner_table where join_condition matches:
@@ -1716,6 +1746,7 @@ tables are large — this becomes the worst-case option at scale.
 ```
 
 **Hash join:** build an in-memory hash table from the smaller input (keyed on the join column), then scan the larger input, probing the hash table for matches.
+
 ```
 build phase: hash_table = { row.join_key: row for row in smaller_table }
 probe phase: for each row in larger_table:
@@ -1729,6 +1760,7 @@ the build-side table is too large to fit (spills to disk).
 ```
 
 **Merge join:** requires both inputs to already be **sorted** on the join key; then merges them in a single linear pass, similar to merging two sorted lists.
+
 ```
 Both inputs sorted by join_key:
   pointer_a = start of table_a, pointer_b = start of table_b
@@ -1741,7 +1773,56 @@ Cost: if the inputs AREN'T already sorted, the optimizer must add an
 explicit sort step first, which can be expensive for large tables.
 ```
 
-**Source:** https://www.postgresql.org/docs/current/planner-optimizer.html
-https://www.postgresql.org/docs/current/explicit-locking.html
+**Source:** <https://www.postgresql.org/docs/current/planner-optimizer.html>
+<https://www.postgresql.org/docs/current/explicit-locking.html>
 
 <AnkiTags query-planner joins nested-loop hash-join merge-join intermediate advanced/>
+
+# How do you safely run a database schema migration on a live production system without downtime?
+
+A schema migration changes a database's structure (adding/removing columns, changing types, adding constraints) while the application is actively reading and writing — done carelessly, it can lock tables, break currently-running application code, or cause data loss.
+
+**The core risk:** application code and database schema are deployed independently in most systems. During a rolling deploy, **old application code and new application code run simultaneously against the same database** for some window of time — a migration that isn't backward-compatible with the old code will break it mid-deploy.
+
+**The standard safe pattern — expand/contract (parallel change):**
+
+```
+1. EXPAND: add the new structure WITHOUT removing the old one.
+   e.g. adding a new column as NULLABLE (or with a default),
+   never as NOT NULL in the same step — old code that doesn't know
+   about the new column must keep working unmodified.
+
+2. MIGRATE/BACKFILL: populate the new structure from existing data,
+   typically in small batches to avoid long table locks.
+   UPDATE users SET full_name = first_name || ' ' || last_name
+   WHERE full_name IS NULL LIMIT 1000;   -- repeat until done
+
+3. DUAL-WRITE (if needed): deploy application code that writes to
+   BOTH old and new structures, so both stay in sync during transition.
+
+4. CONTRACT: once ALL application instances are confirmed running
+   the new code (old code path is fully retired), remove the old
+   structure — drop the old column, add the NOT NULL constraint, etc.
+```
+
+**Operations that are dangerous to run directly on a large, live table:**
+
+```sql
+-- DANGEROUS: adding a column with a non-null default can rewrite
+-- every row on older PostgreSQL versions (fixed in PG 11+, but still
+-- worth checking your specific engine/version)
+ALTER TABLE orders ADD COLUMN status TEXT NOT NULL DEFAULT 'pending';
+
+-- DANGEROUS: building an index locks writes on older engines/configs
+CREATE INDEX idx_orders_status ON orders(status);
+
+-- SAFER: build the index without blocking writes (PostgreSQL)
+CREATE INDEX CONCURRENTLY idx_orders_status ON orders(status);
+```
+
+**Why rollback plans matter:** every migration should have a tested rollback path — for the expand/contract pattern, rolling back is usually as simple as not yet running the "contract" step, since the old structure was never removed while both code paths might still need it.
+
+**Source:** <https://www.postgresql.org/docs/current/sql-createindex.html#SQL-CREATEINDEX-CONCURRENTLY>
+<https://www.postgresql.org/docs/current/sql-altertable.html>
+
+<AnkiTags schema-migration zero-downtime backward-compatibility expand-contract intermediate advanced/>
