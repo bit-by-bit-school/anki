@@ -2889,3 +2889,47 @@ WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);
 **Source:** <https://www.postgresql.org/docs/current/functions-subquery.html>
 
 <AnkiTags semi-join anti-join EXISTS NOT-EXISTS joins advanced/>
+
+# What is the N+1 query problem, and how do you fix it?
+
+The N+1 query problem occurs when code fetches a list of N parent records with one query, then executes **one additional query per parent record** to fetch related data — resulting in N+1 total queries where a single, well-constructed query (or a small constant number of queries) would have sufficed.
+
+```python
+# N+1 PROBLEM: this looks innocent but issues 1 + N queries
+orders = db.query("SELECT * FROM orders LIMIT 50")   # 1 query
+for order in orders:
+    customer = db.query(                              # +1 query EACH TIME
+        "SELECT * FROM customers WHERE id = %s", order.customer_id
+    )
+    print(customer.name)
+# Total: 51 queries to render 50 orders with their customer names
+```
+
+**Why it's so common in practice:** ORMs make this trivially easy to write by accident — accessing a "lazy-loaded" relationship attribute (`order.customer.name`) silently triggers a new query per object in a loop, with no visible sign in the code that anything expensive just happened.
+
+**Fixes:**
+
+```sql
+-- Fix 1: a single JOIN replaces the N+1 queries with one query
+SELECT o.*, c.name AS customer_name
+FROM orders o JOIN customers c ON o.customer_id = c.id
+LIMIT 50;
+```
+
+```python
+# Fix 2: ORM eager loading (e.g. SQLAlchemy) — fetch related rows
+# up front in a batched query instead of one-by-one in the loop
+orders = session.query(Order).options(joinedload(Order.customer)).limit(50)
+```
+
+```sql
+-- Fix 3: batch the "N" queries into ONE query using IN, if a JOIN
+-- isn't a good fit for the access pattern
+SELECT * FROM customers WHERE id IN (101, 102, 103, ...);  -- all 50 IDs at once
+```
+
+**How to spot it in practice:** query logs or an APM tool (New Relic, Datadog) showing a suspiciously large, linearly-scaling number of near-identical queries per request is the classic signature — "47 queries to load one dashboard" is the canonical symptom.
+
+**Source:** <https://www.postgresql.org/docs/current/sql-select.html>
+
+<AnkiTags N-plus-1 ORM query-optimization joins performance intermediate advanced/>
