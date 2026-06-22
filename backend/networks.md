@@ -3057,3 +3057,43 @@ tcpdump -i any host api.example.com # last resort: inspect raw packets
 <https://www.rfc-editor.org/rfc/rfc792>
 
 <AnkiTags troubleshooting tools diagnostics ping traceroute dig tcpdump intermediate/>
+
+# What is the difference between symmetric and asymmetric encryption?
+
+**Symmetric encryption:** uses the **same key** to both encrypt and decrypt. Fast and efficient, but both parties need a way to share that key securely beforehand.
+
+```
+Sender:   plaintext --[encrypt with KEY]--> ciphertext
+Receiver: ciphertext --[decrypt with SAME KEY]--> plaintext
+
+Common algorithms: AES, ChaCha20
+
+Problem: how do two parties who've never met agree on a shared
+secret key over a network an attacker might be listening to?
+```
+
+**Asymmetric encryption (public-key cryptography):** uses a **mathematically related key pair** — a public key (freely shared) and a private key (kept secret). Data encrypted with the public key can only be decrypted with the corresponding private key, and vice versa.
+
+```
+Sender:   plaintext --[encrypt with RECEIVER'S PUBLIC key]--> ciphertext
+Receiver: ciphertext --[decrypt with OWN PRIVATE key]--> plaintext
+
+Common algorithms: RSA, ECC (Elliptic Curve Cryptography)
+
+No shared secret needs to be exchanged in advance — the public key
+can be broadcast openly; only the private key holder can decrypt.
+```
+
+|                    | Symmetric                          | Asymmetric                                              |
+| ------------------ | ---------------------------------- | ------------------------------------------------------- |
+| **Speed**          | Much faster                        | Much slower (orders of magnitude)                       |
+| **Key management** | Hard — secure key exchange problem | Easy — public key can be shared openly                  |
+| **Key count**      | One shared key per pair of parties | One key pair per party (scales better for many parties) |
+| **Typical use**    | Bulk data encryption               | Key exchange, digital signatures, identity verification |
+
+**Why TLS uses both (hybrid approach):** TLS handshakes use asymmetric cryptography (ECDHE key exchange, RSA/certificate verification — see the dedicated TLS cards) specifically to **establish a shared symmetric session key safely**, then switches to fast symmetric encryption (AES) for the actual bulk data transfer. Asymmetric crypto solves the key-exchange problem; symmetric crypto handles the high-volume work efficiently — this hybrid pattern is the standard real-world answer to "why not just use one or the other?"
+
+**Source:** <https://www.rfc-editor.org/rfc/rfc8446>
+<https://csrc.nist.gov/glossary/term/asymmetric_cryptography>
+
+<AnkiTags encryption symmetric asymmetric cryptography TLS fundamentals junior intermediate/>
