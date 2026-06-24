@@ -1,5 +1,5 @@
 ---
-name: leetcode
+name: leetcode easy
 ---
 
 # Valid Palindrome
