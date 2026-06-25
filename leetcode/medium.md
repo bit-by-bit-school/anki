@@ -72,11 +72,11 @@ Given the root of a binary tree, imagine yourself standing on the right side of 
 
 . . .
 
-Pattern: BFS
+Pattern: Breadth First Search
 
 Solution: When adding a node to the queue, also add its level. Write the node seen against the level in a hashmap. Process the left subtree before the right so that the final values will be the rightmost ones.
 
-Complexity: O(n) time, O(1) space.
+Complexity: O(n) time, O(height) space.
 
 # Minimum Size Subarray Sum (209)
 
