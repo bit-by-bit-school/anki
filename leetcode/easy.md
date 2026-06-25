@@ -2,7 +2,30 @@
 name: leetcode easy
 ---
 
-# Valid Palindrome
+# Best Time to Buy and Sell Stock (121)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+**Statement:**
+Given an array `prices` where `prices[i]` is the price of a given stock on day `i`, return the maximum profit you can achieve from buying on one day and selling on a later day. If no profit is possible, return 0.
+
+**Constraints:**
+
+- `1 <= prices.length <= 10^5`
+- `0 <= prices[i] <= 10^4`
+
+</details>
+
+. . .
+
+Pattern: Single pass tracking the running minimum
+
+Solution: Track `min_price` and `max_profit`. For each `price`, update `min_price = min(min_price, price)`, then `max_profit = max(max_profit, price - min_price)`. Return `max_profit`.
+
+Complexity: O(n) time and O(1) space
+
+# Valid Palindrome (125)
 
 <details>
 <summary>Show problem statement and constraints</summary>
@@ -24,7 +47,9 @@ Pattern: Two Pointers
 
 Solution: Filter out non-alphanumeric characters, then compare inward. A mismatch at any point means the input is not a palindrome
 
-# Contains Duplicates 2
+Complexity: O(n) time and O(n) space
+
+# Contains Duplicates 2 (219)
 
 <details>
 <summary>Show problem statement and constraints</summary>
@@ -46,23 +71,4 @@ Pattern: Sliding Window
 
 Solution: Maintain a sliding window of the last k elements using a hash set. For each `nums[i]`, check whether it is already in the set. If yes, return True. Otherwise add it to the set. If the window grows beyond k, remove the element that falls out. Return False if no duplicate is found.
 
-# Best Time to Buy and Sell Stock
-
-<details>
-<summary>Show problem statement and constraints</summary>
-
-**Statement:**
-Given an array `prices` where `prices[i]` is the price of a given stock on day `i`, return the maximum profit you can achieve from buying on one day and selling on a later day. If no profit is possible, return 0.
-
-**Constraints:**
-
-- `1 <= prices.length <= 10^5`
-- `0 <= prices[i] <= 10^4`
-
-</details>
-
-. . .
-
-Pattern: Single pass tracking the running minimum
-
-Solution: Track `min_price` and `max_profit`. For each `price`, update `min_price = min(min_price, price)`, then `max_profit = max(max_profit, price - min_price)`. Return `max_profit`.
+Complexity: O(n) time and O(min(n,k)) space
