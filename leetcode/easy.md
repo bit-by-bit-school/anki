@@ -49,6 +49,29 @@ Solution: Filter out non-alphanumeric characters, then compare inward. A mismatc
 
 Complexity: O(n) time and O(n) space
 
+# Contains Duplicates (217)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+**Statement:**
+Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.
+
+**Constraints:**
+
+- `1 <= nums.length <= 105`
+- `109 <= nums[i] <= 109`
+
+</details>
+
+. . .
+
+Pattern: Hashing
+
+Solution: Iterate through the input array and create a hashmap simultaneously, mapping number to its frequency. At any point if the number already exists in the hashmap then return True. At the end of the iteration, return False.
+
+Complexity: O(n) time and O(n) space
+
 # Contains Duplicates 2 (219)
 
 <details>
