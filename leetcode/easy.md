@@ -72,3 +72,31 @@ Pattern: Sliding Window
 Solution: Maintain a sliding window of the last k elements using a hash set. For each `nums[i]`, check whether it is already in the set. If yes, return True. Otherwise add it to the set. If the window grows beyond k, remove the element that falls out. Return False if no duplicate is found.
 
 Complexity: O(n) time and O(min(n,k)) space
+
+# Concatenation of an Array (1929)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+Statement:
+Given an integer array nums of length n, you want to create an array ans of length 2n where `ans[i] == nums[i]` and `ans[i + n] == nums[i]` for `0 <= i < n` (0-indexed).
+
+Specifically, ans is the concatenation of two nums arrays.
+
+Return the array ans.
+
+Constraints:
+
+- `n == nums.length`
+- `1 <= n <= 1000`
+- `1 <= nums[i] <= 1000`
+
+</details>
+
+...
+
+Pattern: Simulation
+
+Solution: Initialize an array of length twice the input array and set all its values to 0. Every element with index i and i + n, n being the length of the input array, are equal.
+
+Complexity: O(n) time and O(n) space
