@@ -73,6 +73,30 @@ Solution: Maintain a sliding window of the last k elements using a hash set. For
 
 Complexity: O(n) time and O(min(n,k)) space
 
+# Valid Anagram (242)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+Statement:
+
+Given two strings s and t, return true if t is an anagram of s, and false otherwise.
+
+Constraints:
+
+- `1 <= s.length, t.length <= 5 * 104`
+- s and t consist of lowercase English letters.
+
+</details>
+
+...
+
+Pattern: Hashing
+
+Solution: Create a hashmap with one string, mapping distinct letter to its frequency in the string. Iterate through the other string checking if each letter exists in the hashmap. After the iteration completes, for valid anagrams, the values in the hashmap should all be zero.
+
+Complexity: O(n) time and O(n) space
+
 # Concatenation of an Array (1929)
 
 <details>
