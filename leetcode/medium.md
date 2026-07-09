@@ -102,6 +102,32 @@ Solution: Increase the right pointer when the current sum is at or below the tar
 
 Complexity: O(n) time, O(1) space.
 
+# Product of Array Except Self (238)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+**Statement:**
+Given an integer array nums, return an array answer such that answer[i] is equal to the product of all the elements of nums except nums[i]without using the division operation.
+
+**Constraints:**
+
+- `2 <= nums.length <= 105`
+- `-30 <= nums[i] <= 30`
+- `The input is generated such that answer[i] is guaranteed to fit in a 32-bit integer.`
+
+</details>
+
+. . .
+
+Pattern: Prefix Product Array
+
+Solution: Calculate a prefix product array and a suffix product array. Then each entry is the product of the left hand side prefix and the right hand side suffix.
+
+Memory usage can be further reduced by avoiding constructing a suffix array and instead processing in reverse. In that case, the ongoing product calculation can be used as the suffixes at each step.
+
+Complexity: O(n) time, O(1) space other than output.
+
 # Binary Tree Longest Consecutive Sequence (298)
 
 <details>
