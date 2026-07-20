@@ -2,6 +2,29 @@
 name: leetcode medium
 ---
 
+# Longest Substring Without Repeating Characters (3)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+**Statement:**
+Given a string s, find the length of the longest substring without duplicate characters.
+
+**Constraints:**
+
+- `0 <= s.length <= 5 * 104`
+- `s consists of English letters, digits, symbols and spaces.`
+
+</details>
+
+. . .
+
+Pattern: Sliding Window + Hashmap of Indices
+
+Solution: Maintain a hashmap of characters against their indices and a running current length. If the character at the right pointer is not in the hashmap, or its stored index is before the left pointer, record its index, advance the right pointer, increase the current length by 1, and update the maximum. Otherwise, move the left pointer to the index after the repeat and reset the current length to right minus left, without advancing the right pointer — it gets processed as a fresh character on the next pass.
+
+Complexity: O(n) time, O(min(n, charset size)) space.
+
 # Three Sum (15)
 
 <details>
@@ -223,6 +246,7 @@ Complexity: O(n) time and O(1) space.
 Design an algorithm that accepts a stream of integers and retrieves the product of the last k integers of the stream.
 
 Implement the ProductOfNumbers class:
+
 - ProductOfNumbers() Initializes the object with an empty stream.
 - void add(int num) Appends the integer num to the stream.
 - int getProduct(int k) Returns the product of the last k numbers in the current list. You can assume that always the current list has at least k numbers.
