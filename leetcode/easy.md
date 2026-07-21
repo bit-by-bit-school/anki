@@ -120,6 +120,27 @@ Solution: Create a hashmap with one string, mapping distinct letter to its frequ
 
 Complexity: O(n) time and O(n) space
 
+# Min Cost Climbing Stairs (746)
+
+<details>
+<summary>Min Cost Climbing Stairs</summary>
+
+You are given an integer array `cost` where `cost[i]` is the cost of the `i`-th step on a staircase. Once you pay the cost, you can either climb one or two steps. You can either start from the step with index 0, or the step with index 1. Return the minimum cost to reach the top of the floor (i.e., one step past the last index in `cost`).
+
+Constraints:
+
+- `2 <= cost.length <= 1000`
+- `0 <= cost[i] <= 999`
+
+</summary>
+</details>
+
+. . .
+
+**Pattern:** 1D DP — bottom-up tabulation, in-place
+
+**Solution:** Append a 0 to `cost` representing the top floor. Starting from the third-to-last index and moving left, overwrite each `cost[i]` with `cost[i] + min(cost[i+1], cost[i+2])` — the cost of this step plus the cheaper of the two ways to finish from one or two steps ahead. Once every index has been overwritten this way, the answer is the cheaper of `cost[0]` and `cost[1]`, since you can start from either.
+
 # Concatenation of an Array (1929)
 
 <details>
