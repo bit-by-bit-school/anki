@@ -81,7 +81,7 @@ Complexity: O(n) time, O(1) space.
 # House Robber (198)
 
 <details>
-<summary>Problem Statement</summary>
+<summary>Show problem statement and constraints</summary>
 
 You are a robber planning to rob houses along a street, where each house has some amount of money stashed. You cannot rob two adjacent houses (robbing both triggers an alarm). Given an array of non-negative integers representing the money in each house, return the maximum amount you can rob without robbing two adjacent houses.
 
@@ -101,6 +101,8 @@ Dynamic Programming 1D — top-down memoized recursion via closure
 **Solution**
 
 For a given starting index, the best achievable amount is either: rob the house at that index and add the best amount achievable from two indices ahead, or skip it and take the best amount achievable from one index ahead — whichever is larger. Results are cached by index in a dictionary that lives outside the recursive calls, so each index is only computed once. The last one or two indices are base cases, returning the maximum of the remaining houses directly. The answer is the result for index 0.
+
+Complexity: O(n) time, O(1) space
 
 # Binary Tree Right Side View (199)
 
