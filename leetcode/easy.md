@@ -2,6 +2,47 @@
 name: leetcode easy
 ---
 
+# Merge Sorted Array (88)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+You are given two integer arrays nums1 and nums2, sorted in
+non-decreasing order, and two integers m and n, representing the
+number of elements in nums1 and nums2 respectively.
+
+Merge nums1 and nums2 into a single array sorted in non-decreasing
+order.
+
+The final sorted array should not be returned by the function, but
+instead be stored inside the array nums1. To accommodate this,
+nums1 has a length of m + n, where the first m elements denote the
+elements that should be merged, and the last n elements are set to
+0 and should be ignored. nums2 has a length of n.
+
+Constraints:
+
+- `nums1.length = m + n`
+- `nums2.length = n`
+- `0 <= m, n <= 200`
+- `1 <= m + n <= 200`
+- `-10^9 <= nums1[i], nums2[j] <= 10^9`
+
+</details>
+
+. . .
+
+**Pattern:** Two Pointers
+
+**Solution:** Place a pointer at index m-1 in nums1 and another at index n-1 in nums2. Place a third pointer
+at index m+n-1 in nums1. Compare the first two pointers' values and place the greater at the third pointer's
+position, decrementing whichever of the first two supplied it. If the first pointer has moved past
+index 0 (all of nums1's original elements placed), skip the comparison and place the second pointer's
+value directly. The third pointer decreases with every comparison. Once the second pointer has placed
+all its values, the remaining elements in nums1 are already in their correct positions.
+
+Complexity: O(m+n) time and O(1) space
+
 # Best Time to Buy and Sell Stock (121)
 
 <details>
@@ -140,6 +181,8 @@ Constraints:
 **Pattern:** 1D DP — bottom-up tabulation, in-place
 
 **Solution:** Append a 0 to `cost` representing the top floor. Starting from the third-to-last index and moving left, overwrite each `cost[i]` with `cost[i] + min(cost[i+1], cost[i+2])` — the cost of this step plus the cheaper of the two ways to finish from one or two steps ahead. Once every index has been overwritten this way, the answer is the cheaper of `cost[0]` and `cost[1]`, since you can start from either.
+
+Complexity: O(n) time and O(1) space
 
 # Concatenation of an Array (1929)
 
