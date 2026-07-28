@@ -2,6 +2,33 @@
 name: leetcode easy
 ---
 
+# Two Sum (1)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
+
+You may assume that each input would have exactly one solution, and you may not use the same element twice.
+
+You can return the answer in any order.
+
+Constraints:
+
+- `1 <= nums.length <= 10^5`
+- `-10^9 <= nums[i] <= 10^9`
+- `-10^9 <= target <= 10^9`
+
+</details>
+
+. . .
+
+**Pattern:** Hashing
+
+**Solution:** Create a hashmap to store `number` and its `index` as key-value pairs. For each number in the input array, calculate `complement = target - number`. If the complement exists in the hashmap, return its index and the current index. Otherwise, add the current number and its index to the hashmap.
+
+**Complexity:** O(n) time and O(n) space
+
 # Merge Sorted Array (88)
 
 <details>
