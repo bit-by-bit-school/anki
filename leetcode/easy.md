@@ -29,6 +29,29 @@ Constraints:
 
 **Complexity:** O(n) time and O(n) space
 
+# Remove Duplicates from Sorted Array (26)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+Given an integer array `nums` sorted in non-decreasing order, remove the duplicates in-place such that each unique element appears only once. The relative order of the elements should be kept the same. Return `k`, the number of unique elements, after placing them at the front of `nums`.
+
+**Constraints:**
+
+- `1 <= nums.length <= 3 * 10^4`
+- `-100 <= nums[i] <= 100`
+- `nums is sorted in non-decreasing order`
+
+</details>
+
+. . .
+
+Pattern: Two pointers
+
+Solution: Anchor pointer at last confirmed-unique element (starts at index 0), scan pointer starts one ahead. Advance scanner continuously; on a differing value, advance anchor and copy scanner's value into it, incrementing count.
+
+Complexity: O(n) time and O(1) space
+
 # Merge Sorted Array (88)
 
 <details>
