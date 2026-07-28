@@ -25,6 +25,33 @@ Solution: Maintain a hashmap of characters against their indices and a running c
 
 Complexity: O(n) time, O(min(n, charset size)) space.
 
+# Container With Most Water(11)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+**Statement:**
+You are given an integer array `height` of length `n`. There are `n` vertical lines drawn such that the two endpoints of the `i`th line are `(i, 0)` and `(i, height[i])`.
+Find two lines that together with the x-axis form a container, such that the container contains the most water.
+Return the maximum amount of water a container can store.
+Notice that you may not slant the container.
+
+**Constraints:**
+
+- `n == height.length`
+- `2 <= n <= 105`
+- `0 <= height[i] <= 104`
+
+</details>
+
+. . .
+
+**Pattern:** Two Pointers
+
+**Solution:** Initialize two pointers at the start and end of the array. At each step, calculate the area formed between them, which is the distance between the pointers multiplied by the minimum of the heights at the two pointers. Update the maximum area if the current area is larger. Then, move the pointer pointing to the shorter line inward (towards the other pointer), as keeping the shorter line cannot yield a larger area with any other line since the width will decrease.
+
+**Complexity:** O(n) time, O(1) space.
+
 # Three Sum (15)
 
 <details>
