@@ -77,6 +77,34 @@ Solution: Sort the input. Then for each element, initialize two pointers at the 
 
 Complexity: O(n^2) time, O(1) space.
 
+# Maximum Subarray (53)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+**Statement:** Given an integer array, find the subarray with the largest sum, and return that sum.
+
+**Constraints:**
+
+- `1 <= nums.length <= 10^5`
+- `-10^4 <= nums[i] <= 10^4`
+
+</details>
+
+. . .
+
+Pattern: Kadane's algorithm(Dynamic Programming 1D), Prefix Sum
+
+Solution:
+
+1. Prefix Sum approach:
+   Build a prefix sum array while scanning the input array. Now scan the prefix sum array and at each position take the difference between the current prefix sum and the smallest prefix sum seen before it. Subtracting off the lowest running total isolates the best possible gain from some earlier point to here. The best such difference across the scan is the answer.
+
+2. Kadane's algorithm:
+   Track, at each position, the best sum achievable ending there, by comparing the current element alone against the extended running sum from the previous position and keeping whichever is larger; a separate running record holds the best sum seen anywhere during the scan.
+
+Complexity: Prefix sum approach — O(n) time, O(n) space. Kadane's algorithm — O(n) time, O(1) space.
+
 # Linked List Cycle II (142)
 
 <details>
