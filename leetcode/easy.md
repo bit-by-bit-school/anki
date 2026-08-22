@@ -229,11 +229,11 @@ Constraints:
 
 ...
 
-Pattern: hashmap, sorting + sliding window
+Pattern: hashing, sorting + sliding window
 
-Hashmap solution: Store each number and its frequency in a hashmap. For each number, check if its neighbor (`num + 1` or `num - 1`) exists in the hashmap. If it does, compare the sum of their frequencies with max_val to track the longest harmonious subsequence.
+Hashing solution: Store each number and its frequency in a hashmap. For each number, check if its neighbor (`num + 1` or `num - 1`) exists in the hashmap. If it does, compare the sum of their frequencies with max_val to track the longest harmonious subsequence.
 
-Complexity: hashmap solution: O(n) time and O(n) space, sort + sliding window solution: O(nlogn) time and O(1) space
+Complexity: hashing solution: O(n) time and O(n) space, sort + sliding window solution: O(nlogn) time and O(1) space
 
 # Min Cost Climbing Stairs (746)
 
@@ -285,3 +285,28 @@ Pattern: Simulation
 Solution: Initialize an array of length twice the input array and set all its values to 0. Every element with index i and i + n, n being the length of the input array, are equal.
 
 Complexity: O(n) time and O(n) space
+
+# Count Number of Pairs With Absolute Difference K (2006)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+Given an integer array `nums` and an integer `k`, return the number of pairs `(i, j)` where `i < j` such that `|nums[i] - nums[j]| == k`.
+
+The value of `|x|` is the absolute value of `x`.
+
+Constraints:
+
+- `1 <= nums.length <= 200`
+- `1 <= nums[i] <= 100`
+- `1 <= k <= 99`
+
+</details>
+
+. . .
+
+**Pattern:** Hashing
+
+**Solution:** Create a hashmap to store `number` and its `frequency` as key-value pairs. For each number in the input array, check if `num + k` or `num - k` exists in the hashmap. If they do, add their frequencies to the total pairs count. Afterward, increment the current number's frequency in the hashmap.
+
+**Complexity:** O(n) time and O(n) space
