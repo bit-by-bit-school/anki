@@ -211,6 +211,30 @@ Solution: Create a hashmap with one string, mapping distinct letter to its frequ
 
 Complexity: O(n) time and O(n) space
 
+# Longest Harmonious Subsequence (594)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+Statement:
+
+We define a harmonious array as an array where the difference between its maximum value and its minimum value is exactly `1`. Given an integer array `nums`, return the length of its longest harmonious subsequence among all its possible subsequences.
+
+Constraints:
+
+- `1 <= nums.length <= 2 * 104`
+- `-109 <= nums[i] <= 109`
+
+</details>
+
+...
+
+Pattern: hashmap, sorting + sliding window
+
+Hashmap solution: Store each number and its frequency in a hashmap. For each number, check if its neighbor (`num + 1` or `num - 1`) exists in the hashmap. If it does, compare the sum of their frequencies with max_val to track the longest harmonious subsequence.
+
+Complexity: hashmap solution: O(n) time and O(n) space, sort + sliding window solution: O(nlogn) time and O(1) space
+
 # Min Cost Climbing Stairs (746)
 
 <details>
