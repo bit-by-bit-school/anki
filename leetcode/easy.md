@@ -217,34 +217,29 @@ Solution: Create a hashmap with one string, mapping distinct letter to its frequ
 
 Complexity: O(n) time and O(n) space
 
-# K-diff Pairs in an Array (532)
+# Longest Harmonious Subsequence (594)
 
 <details>
 <summary>Show problem statement and constraints</summary>
 
-Given an array of integers `nums` and an integer `k`, return the number of unique k-diff pairs in the array.
+Statement:
 
-A k-diff pair is an integer pair `(nums[i], nums[j])` where:
-- `0 <= i, j < nums.length`
-- `i != j`
-- `|nums[i] - nums[j]| == k`
+We define a harmonious array as an array where the difference between its maximum value and its minimum value is exactly `1`. Given an integer array `nums`, return the length of its longest harmonious subsequence among all its possible subsequences.
 
 Constraints:
 
-- `1 <= nums.length <= 10^4`
-- `-10^7 <= nums[i] <= 10^7`
-- `0 <= k <= 10^7`
+- `1 <= nums.length <= 2 * 104`
+- `-109 <= nums[i] <= 109`
 
 </details>
 
-. . .
+...
 
-**Pattern:** Hashing
+Pattern: hashing, sorting + sliding window
 
-**Solution:** Maintain a hashmap of frequencies for all numbers in the array. Iterate through the unique keys in the hashmap. If `k > 0`, check if `num + k` exists in the hashmap to form a pair. If `k == 0`, check if the frequency of the current `num` is strictly greater than 1.
+Hashing solution: Store each number and its frequency in a hashmap. For each number, check if its neighbor (`num + 1` or `num - 1`) exists in the hashmap. If it does, compare the sum of their frequencies with max_val to track the longest harmonious subsequence.
 
-**Complexity:** O(n) time and O(n) space
-
+Complexity: hashing solution: O(n) time and O(n) space, sort + sliding window solution: O(nlogn) time and O(1) space
 
 # Min Cost Climbing Stairs (746)
 
