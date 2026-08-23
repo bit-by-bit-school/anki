@@ -110,9 +110,15 @@ Given an array `prices` where `prices[i]` is the price of a given stock on day `
 
 . . .
 
-Pattern: Single pass tracking the running minimum
+Pattern: Single pass tracking the running minimum, sliding window
 
-Solution: Track `min_price` and `max_profit`. For each `price`, update `min_price = min(min_price, price)`, then `max_profit = max(max_profit, price - min_price)`. Return `max_profit`.
+Solution:
+Tracking the running minimum: Track `min_price` and `max_profit`. For each `price`, update `min_price = min(min_price, price)`, then `max_profit = max(max_profit, price - min_price)`. Return `max_profit`.
+
+Sliding Window: Anchor the left pointer at index `0`, scan the right pointer from left to right starting at
+index `1`. Calculate `current_profit` through difference of left and right pointers, when it is `< 0` move
+the left pointer to the right pointer and keep updating the `max_profit` when `current_profit > max_profit`
+as the right pointer scans the array.
 
 Complexity: O(n) time and O(1) space
 
@@ -239,7 +245,7 @@ Constraints:
 
 **Complexity:** O(n) time and O(n) space
 
-Longest Harmonious Subsequence (594)
+# Longest Harmonious Subsequence (594)
 
 <details>
 <summary>Show problem statement and constraints</summary>
