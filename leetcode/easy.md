@@ -211,7 +211,35 @@ Solution: Create a hashmap with one string, mapping distinct letter to its frequ
 
 Complexity: O(n) time and O(n) space
 
-# Longest Harmonious Subsequence (594)
+# K-diff Pairs in an Array (532)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+Given an array of integers `nums` and an integer `k`, return the number of unique k-diff pairs in the array.
+
+A k-diff pair is an integer pair `(nums[i], nums[j])` where:
+- `0 <= i, j < nums.length`
+- `i != j`
+- `|nums[i] - nums[j]| == k`
+
+Constraints:
+
+- `1 <= nums.length <= 10^4`
+- `-10^7 <= nums[i] <= 10^7`
+- `0 <= k <= 10^7`
+
+</details>
+
+. . .
+
+**Pattern:** Hashing
+
+**Solution:** Maintain a hashmap of frequencies for all numbers in the array. Iterate through the unique keys in the hashmap. If `k > 0`, check if `num + k` exists in the hashmap to form a pair. If `k == 0`, check if the frequency of the current `num` is strictly greater than 1.
+
+**Complexity:** O(n) time and O(n) space
+
+Longest Harmonious Subsequence (594)
 
 <details>
 <summary>Show problem statement and constraints</summary>
