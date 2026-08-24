@@ -53,7 +53,32 @@ Integer division and mod solution: If `x` is negative, return `False`. Find the 
 Two pointer solution: Convert input into a string. Then starting left pointer at the most significant digit and the right pointer at the least significant digit,
 check for equality. Move left and right pointers toward each other and do the same check, repeat this until the pointers go past each other.
 
-**Complexity:** O(log n) time (specifically base 10, as there are log10(n) digits) and O(1) space, Two pointers solution: O(n) time and O(n) space
+**Complexity:** Integer division and mod solution: O(log n) time (specifically base 10, as there are log10(n) digits) and O(1) space, Two pointers solution: O(n) time and O(n) space
+
+# Longest Common Prefix (14)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+Write a function to find the longest common prefix string amongst an array of strings.
+
+If there is no common prefix, return an empty string `""`.
+
+Constraints:
+
+- `1 <= strs.length <= 200`
+- `0 <= strs[i].length <= 200`
+- `strs[i]` consists of only lowercase English letters.
+
+</details>
+
+. . .
+
+**Pattern:** String (Horizontal Scanning)
+
+**Solution:** Initialize the prefix as the first string in the array. Iterate through the rest of the strings. For each string, continuously shorten the prefix from the end (e.g., `prefix = prefix[:-1]`) until the current string starts with the prefix. If the prefix becomes empty at any point, immediately return an empty string `""`. If the loop finishes, return the remaining prefix.
+
+**Complexity:** O(mn) time where m is length of `strs[0]` and n is length of `strs` and O(m) space
 
 # Remove Duplicates from Sorted Array (26)
 
