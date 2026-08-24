@@ -29,6 +29,32 @@ Constraints:
 
 **Complexity:** O(n) time and O(n) space
 
+# Palindrome Number (9)
+
+<details>
+<summary>Show problem statement and constraints</summary>
+
+Given an integer `x`, return `true` if `x` is a palindrome, and `false` otherwise.
+
+Follow up: Could you solve it without converting the integer to a string?
+
+Constraints:
+
+- `-2^31 <= x <= 2^31 - 1`
+
+</details>
+
+. . .
+
+**Pattern:** Integer division and mod, two pointers
+
+Integer division and mod solution: If `x` is negative, return `False`. Find the largest power of 10 (`div`) that is less than or equal to `x`. Loop while `x` is greater than 0: compare the leading digit (`x // div`) with the trailing digit (`x % 10`). If they do not match, return `False`. Otherwise, strip both the first and last digits from `x` using `(x % div) // 10`, and shrink `div` by a factor of 100. Return `True` if the loop completes successfully.
+
+Two pointer solution: Convert input into a string. Then starting left pointer at the most significant digit and the right pointer at the least significant digit,
+check for equality. Move left and right pointers toward each other and do the same check, repeat this until the pointers go past each other.
+
+**Complexity:** O(log n) time (specifically base 10, as there are log10(n) digits) and O(1) space, Two pointers solution: O(n) time and O(n) space
+
 # Remove Duplicates from Sorted Array (26)
 
 <details>
