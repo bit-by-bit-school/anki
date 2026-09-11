@@ -2933,3 +2933,10 @@ SELECT * FROM customers WHERE id IN (101, 102, 103, ...);  -- all 50 IDs at once
 **Source:** <https://www.postgresql.org/docs/current/sql-select.html>
 
 <AnkiTags N-plus-1 ORM query-optimization joins performance intermediate advanced/>
+
+# Describe DELETE statement's syntax
+
+```sql
+DELETE FROM table_name WHERE condition
+```
+
